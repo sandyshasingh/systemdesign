@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SystemDesign.dev — Master System Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f0f13;--bg2:#16161e;--bg3:#1e1e2a;--bg4:#252535;
+  --surface:#1a1a26;--surface2:#22223a;
+  --border:#2a2a3d;--border2:#363650;
+  --accent:#7c6af7;--accent2:#9d8fff;--accent-glow:rgba(124,106,247,0.15);
+  --gold:#f5c518;--text:#e8e8f0;--text2:#9090b0;
+  --green:#22c55e;--red:#ef4444;--orange:#f97316;--cyan:#06b6d4;
+  --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+  --r:12px;--r2:8px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+/* SIDEBAR */
+#sidebar{position:fixed;top:0;left:0;width:300px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.sb-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{font-family:var(--font-head);font-size:19px;font-weight:800;background:linear-gradient(135deg,var(--accent2),#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}
+.logo span{-webkit-text-fill-color:var(--gold)}
+.prog-wrap{margin-top:12px}
+.prog-label{font-size:11px;color:var(--text2);margin-bottom:5px;display:flex;justify-content:space-between}
+.prog-bar{height:4px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),#c084fc);border-radius:99px;transition:width .5s ease;width:0%}
+.sb-search{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:7px 11px}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:13px;width:100%}
+.search-box input::placeholder{color:var(--text2)}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0 16px}
+.nav-sec-hdr{padding:10px 18px 5px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text2);font-weight:600;font-family:var(--font-head)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;transition:background .12s,color .12s;position:relative;border:none;background:none;width:100%;text-align:left;color:var(--text2);font-family:var(--font-body);font-size:13px;line-height:1.4}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent2)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:15%;bottom:15%;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
+.nav-item .ni-num{width:21px;height:21px;border-radius:50%;background:var(--bg4);color:var(--text2);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-head)}
+.nav-item.done .ni-num{background:rgba(34,197,94,.15);color:var(--green)}
+.nav-item.active .ni-num{background:var(--accent-glow);color:var(--accent2)}
+.nav-item .ni-label{flex:1;min-width:0}
+.nav-item .ni-dur{font-size:10.5px;color:var(--text2);flex-shrink:0}
+.nav-item.active .ni-dur{color:var(--accent)}
+.nav-item .ni-check{font-size:12px;flex-shrink:0;width:14px;text-align:center}
+.nav-item.done .ni-check{color:var(--green)}
+.nav-item.active .ni-check{color:var(--accent2)}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0}
+.streak{display:flex;align-items:center;gap:10px;background:rgba(245,197,24,.06);border:1px solid rgba(245,197,24,.18);border-radius:var(--r2);padding:9px 13px}
+.streak .s1{font-size:11px;color:var(--text2)}
+.streak .s2{font-size:14px;font-weight:700;color:var(--gold);font-family:var(--font-head)}
+
+/* MAIN */
+#main{margin-left:300px;min-height:100vh;display:flex;flex-direction:column}
+#topnav{position:sticky;top:0;z-index:50;background:rgba(15,15,19,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;gap:14px}
+.tn-title{font-family:var(--font-head);font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)}
+.tn-actions{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:var(--r2);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;transition:all .14s;border:none}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-accent:hover{background:var(--accent2);transform:translateY(-1px)}
+.hamburger{display:none;background:none;border:none;color:var(--text);cursor:pointer;font-size:20px;padding:4px;flex-shrink:0}
+
+/* LESSON */
+.lesson-hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:28px 36px;background-image:radial-gradient(ellipse 80% 50% at 75% 40%,rgba(124,106,247,.09),transparent)}
+.lesson-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.badge-mod{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(124,106,247,.22)}
+.badge-time{background:rgba(6,182,212,.1);color:var(--cyan);border:1px solid rgba(6,182,212,.18)}
+.badge-tag{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.18)}
+.badge-done{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.22)}
+.lesson-title{font-family:var(--font-head);font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;line-height:1.2}
+.lesson-sub{color:var(--text2);font-size:14.5px;max-width:680px;line-height:1.65}
+.lesson-acts{display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn-done{background:linear-gradient(135deg,var(--accent),#9333ea);color:#fff;padding:9px 20px;border-radius:var(--r2);border:none;font-family:var(--font-head);font-size:13.5px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.btn-done:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(124,106,247,.28)}
+.btn-done.completed{background:linear-gradient(135deg,#16a34a,#15803d)}
+
+/* LESSON BODY */
+.lesson-body{padding:36px;max-width:860px}
+.lesson-body h2{font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--text);margin:32px 0 12px;letter-spacing:-.3px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.lesson-body h2:first-child{margin-top:0}
+.lesson-body h3{font-family:var(--font-head);font-size:15px;font-weight:600;color:var(--accent2);margin:22px 0 9px}
+.lesson-body p{color:var(--text2);margin-bottom:13px;line-height:1.75}
+.lesson-body p strong{color:var(--text);font-weight:600}
+.lesson-body ul,.lesson-body ol{padding-left:20px;margin-bottom:13px}
+.lesson-body li{color:var(--text2);margin-bottom:5px;line-height:1.65}
+.lesson-body li strong{color:var(--text)}
+
+.callout{border-radius:var(--r);padding:14px 16px;margin:18px 0;border-left:3px solid}
+.callout-info{background:rgba(124,106,247,.07);border-color:var(--accent)}
+.callout-warn{background:rgba(245,197,24,.07);border-color:var(--gold)}
+.callout-success{background:rgba(34,197,94,.07);border-color:var(--green)}
+.callout-tip{background:rgba(6,182,212,.07);border-color:var(--cyan)}
+.callout-title{font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:5px;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.callout-info .callout-title{color:var(--accent2)}
+.callout-warn .callout-title{color:var(--gold)}
+.callout-success .callout-title{color:var(--green)}
+.callout-tip .callout-title{color:var(--cyan)}
+.callout p,.callout div{color:var(--text2);font-size:13.5px;line-height:1.65}
+
+.code-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin:14px 0;overflow-x:auto;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.75;color:#c9d1d9;position:relative;white-space:pre}
+.code-block .code-lbl{position:absolute;top:8px;right:10px;font-size:9.5px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-body);white-space:normal}
+
+.comp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.comp-table th{background:var(--bg3);color:var(--accent2);font-family:var(--font-head);font-weight:600;font-size:11px;letter-spacing:.4px;text-transform:uppercase;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.comp-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.comp-table tr:hover td{background:var(--bg3);color:var(--text)}
+.comp-table tr:last-child td{border-bottom:none}
+
+.quiz-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin:28px 0 0}
+.quiz-hdr{font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.quiz-q{margin-bottom:18px}
+.q-text{color:var(--text);font-weight:500;margin-bottom:9px;font-size:14px}
+.quiz-opts{display:grid;gap:7px}
+.quiz-opt{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:9px 13px;cursor:pointer;transition:all .13s;color:var(--text2);font-size:13px;text-align:left;font-family:var(--font-body);width:100%}
+.quiz-opt:hover:not(:disabled){border-color:var(--accent);color:var(--text);background:var(--accent-glow)}
+.quiz-opt.correct{background:rgba(34,197,94,.1);border-color:var(--green);color:var(--green)}
+.quiz-opt.wrong{background:rgba(239,68,68,.1);border-color:var(--red);color:var(--red)}
+.quiz-opt.reveal{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.05)}
+.quiz-fb{margin-top:7px;padding:7px 11px;border-radius:var(--r2);font-size:12.5px;display:none;line-height:1.55}
+.quiz-fb.show{display:block}
+.quiz-fb.correct{background:rgba(34,197,94,.1);color:#4ade80}
+.quiz-fb.wrong{background:rgba(239,68,68,.1);color:#f87171}
+
+.lesson-nav-bot{display:flex;align-items:center;justify-content:space-between;padding:20px 36px;border-top:1px solid var(--border);background:var(--bg2);gap:10px;flex-wrap:wrap}
+.nav-arr{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--r2);background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:500;transition:all .13s;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-arr:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+.nav-arr.next{background:var(--accent);border-color:var(--accent);color:#fff}
+.nav-arr.next:hover{background:var(--accent2)}
+.nav-arr:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+
+/* OVERVIEW */
+.overview{padding:36px}
+.ov-hero{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:32px;margin-bottom:28px;position:relative;overflow:hidden;background-image:radial-gradient(ellipse 55% 80% at 88% 50%,rgba(124,106,247,.11),transparent)}
+.ov-hero h1{font-family:var(--font-head);font-size:30px;font-weight:800;letter-spacing:-.8px;margin-bottom:8px}
+.ov-hero p{color:var(--text2);max-width:550px;font-size:14.5px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:22px}
+.stat-card{background:var(--bg3);border-radius:var(--r);padding:14px;text-align:center}
+.stat-card .val{font-family:var(--font-head);font-size:24px;font-weight:800;color:var(--accent2)}
+.stat-card .lbl{font-size:11px;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-hdr h2{font-family:var(--font-head);font-size:17px;font-weight:700}
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:32px}
+.mod-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:9px;position:relative;overflow:hidden}
+.mod-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-glow),transparent);opacity:0;transition:opacity .18s}
+.mod-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.mod-card:hover::before{opacity:1}
+.mod-card.completed{border-color:rgba(34,197,94,.28)}
+.mod-card.completed::before{background:linear-gradient(135deg,rgba(34,197,94,.06),transparent);opacity:1}
+.mc-top{display:flex;align-items:center;justify-content:space-between}
+.mc-num{width:30px;height:30px;border-radius:var(--r2);background:var(--accent-glow);color:var(--accent2);font-family:var(--font-head);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.mod-card.completed .mc-num{background:rgba(34,197,94,.12);color:var(--green)}
+.mc-title{font-family:var(--font-head);font-size:13.5px;font-weight:600;line-height:1.3}
+.mc-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2)}
+.mc-tag{display:inline-block;padding:2px 7px;border-radius:99px;background:var(--bg4);font-size:10px;color:var(--text2)}
+.cont-btn{background:linear-gradient(135deg,var(--accent),#9333ea);color:#fff;padding:12px 26px;border-radius:var(--r2);border:none;font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.cont-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(124,106,247,.3)}
+
+/* MOBILE */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99;backdrop-filter:blur(2px)}
+#overlay.show{display:block}
+@media(max-width:900px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #main{margin-left:0}
+  .hamburger{display:block}
+  .lesson-body,.overview{padding:20px}
+  .lesson-hero{padding:20px}
+  .lesson-nav-bot{padding:14px 20px}
+  .lesson-title{font-size:21px}
+  .ov-hero{padding:22px}
+  .ov-hero h1{font-size:23px}
+}
+@media(max-width:560px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .modules-grid{grid-template-columns:1fr}
+  .lesson-acts{flex-direction:column;align-items:flex-start}
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.lesson-hero,.lesson-body,.ov-hero{animation:fadeUp .28s ease both}
+.mod-card{animation:fadeUp .28s ease both}
+
+#xp-toast{position:fixed;bottom:26px;right:26px;z-index:999;background:var(--bg2);border:1px solid var(--green);border-radius:var(--r);padding:12px 18px;display:flex;align-items:center;gap:9px;font-family:var(--font-head);font-size:13.5px;color:var(--green);transform:translateY(70px);opacity:0;transition:all .28s cubic-bezier(.4,0,.2,1);pointer-events:none}
+#xp-toast.show{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="sb-header">
+    <div class="logo">System<span>.</span>Design</div>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Your Progress</span><span id="prog-pct">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    </div>
+  </div>
+  <div class="sb-search">
+    <div class="search-box">
+      <span style="color:var(--text2);font-size:14px">⌕</span>
+      <input type="text" placeholder="Search modules..." id="search-input" oninput="filterNav(this.value)">
+    </div>
+  </div>
+  <nav class="sb-nav" id="sb-nav"></nav>
+  <div class="sb-footer">
+    <div class="streak">
+      <span style="font-size:20px">🔥</span>
+      <div><div class="s1">Learning streak</div><div class="s2" id="streak-val">1 day</div></div>
+    </div>
+  </div>
+</aside>
+<div id="overlay" onclick="toggleSidebar()"></div>
+<main id="main">
+  <header id="topnav">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="tn-title" id="tn-title">Modern System Design</div>
+    <div class="tn-actions">
+      <button class="btn btn-ghost" onclick="showOverview()">⊞ Overview</button>
+      <button class="btn btn-accent" id="tn-complete" onclick="markDone()" style="display:none">✓ Mark Complete</button>
+    </div>
+  </header>
+  <div id="content"></div>
+</main>
+<div id="xp-toast"><span style="font-size:18px">⭐</span><span id="xp-msg">+50 XP — Module Complete!</span></div>
+<script>
+const MODULES=[
+{id:1,title:"Introduction to System Design",tag:"Foundations",time:"12 min",content:{intro:"Welcome to the most important skill in senior software engineering. System Design separates engineers who write code from engineers who build products used by millions.",sections:[
+{h2:"What Is System Design?",body:`<p>Imagine building a social media app like Instagram. You'd need to plan:</p><ul><li>Where do you store millions of photos?</li><li>How do you show a friend's post in seconds from another country?</li><li>What happens when 10 million people open the app simultaneously?</li></ul><p><strong>System Design</strong> is the process of planning how all these pieces fit together. It's like being an architect — before building a skyscraper, you draw blueprints. Before building software used by millions, you design the system.</p>`,callout:{type:"info",title:"🏠 Real-Life Analogy",body:"Think of building a city. You need roads (networks), buildings (servers), water supply (databases), emergency services (fault tolerance), and a city plan (architecture). System Design is creating that city plan for software."}},
+{h2:"Why Every Developer Should Learn This",body:`<table class="comp-table"><thead><tr><th>Reason</th><th>What It Means for You</th></tr></thead><tbody><tr><td>Better Code</td><td>You think about scalability before coding, not after bugs hit production</td></tr><tr><td>Higher Compensation</td><td>Senior + Staff engineer roles require system design fluency</td></tr><tr><td>Interview Success</td><td>FAANG companies always ask system design at senior level</td></tr><tr><td>Career Growth</td><td>Architects and tech leads design systems every day</td></tr><tr><td>Real Problem Solving</td><td>You'll handle outages, slow systems, and scaling challenges</td></tr></tbody></table>`,callout:{type:"success",title:"✅ Key Takeaway",body:"System Design = planning how software components connect, scale, and survive failures. It's the skill that separates junior developers from senior engineers."}},
+{h2:"What This Course Covers",body:`<p>47 modules covering every aspect of modern distributed systems:</p><ul><li><strong>Foundations</strong> — Abstractions, consistency models, non-functional requirements</li><li><strong>Core Building Blocks</strong> — DNS, Load Balancers, Databases, Caches, CDNs, Queues</li><li><strong>Real System Designs</strong> — YouTube, Uber, Twitter, WhatsApp, Google Maps, Instagram</li><li><strong>AI Systems</strong> — ChatGPT, LLM bots, AI code assistants, ML data infrastructure</li><li><strong>Failure Case Studies</strong> — Real outages and what they teach us</li></ul>`},
+],quiz:[
+{q:"What is the primary goal of System Design?",opts:["Writing faster code","Planning how components connect, scale, and survive failures","Choosing a programming language","Fixing bugs"],correct:1,exp:"System Design is about planning architecture — not code. It ensures a system can scale, remain available, and handle failures gracefully."},
+{q:"When should you think about System Design?",opts:["Only after the app breaks","After all features are built","Before and throughout development","Only for apps with 1M+ users"],correct:2,exp:"Great engineers think about system design from day one. Retrofitting scalability is far harder than designing for it upfront."},
+]}},
+{id:2,title:"System Design Interviews",tag:"Interview Prep",time:"18 min",content:{intro:"System Design Interviews are open-ended conversations where you design a large-scale system in 45–60 minutes. Unlike coding interviews, there is no single correct answer — the interviewer evaluates HOW you think.",sections:[
+{h2:"The RESHADED Framework",body:`<p>RESHADED gives you a repeatable structure for any system design problem:</p><table class="comp-table"><thead><tr><th>Letter</th><th>Phase</th><th>Time</th></tr></thead><tbody><tr><td><strong>R</strong></td><td>Requirements Clarification</td><td>5 min</td></tr><tr><td><strong>E</strong></td><td>Estimation (back-of-envelope)</td><td>5 min</td></tr><tr><td><strong>S</strong></td><td>Storage Schema Design</td><td>5 min</td></tr><tr><td><strong>H</strong></td><td>High-Level Design</td><td>10 min</td></tr><tr><td><strong>A</strong></td><td>API Design</td><td>5 min</td></tr><tr><td><strong>D</strong></td><td>Detailed Component Design</td><td>10 min</td></tr><tr><td><strong>E</strong></td><td>Evaluation of trade-offs</td><td>5 min</td></tr><tr><td><strong>D</strong></td><td>Distinctive Features / Edge Cases</td><td>5 min</td></tr></tbody></table>`,callout:{type:"info",title:"💡 Pro Tip",body:"RESHADED is a guide, not a rigid script. Check in with the interviewer every 10 minutes: 'Should I dive deeper into the database layer or move on to caching?' This shows collaborative thinking."}},
+{h2:"Do's and Don'ts",body:`<table class="comp-table"><thead><tr><th>✓ DO</th><th>✗ DON'T</th></tr></thead><tbody><tr><td>Ask clarifying questions first</td><td>Jump into design without clarifying</td></tr><tr><td>State your assumptions out loud</td><td>Stay silent for more than 2 minutes</td></tr><tr><td>Start simple, then add complexity</td><td>Over-engineer the first design</td></tr><tr><td>Discuss trade-offs for every choice</td><td>Present choices without justification</td></tr><tr><td>Draw diagrams as you explain</td><td>Ignore non-functional requirements</td></tr><tr><td>Estimate scale before choosing tech</td><td>Choose databases before knowing the load</td></tr></tbody></table>`},
+{h2:"Why Engineers Fail",body:`<ul><li><strong>No structure</strong> — jumping randomly between topics</li><li><strong>Too much detail too early</strong> — spending 30 minutes on one component</li><li><strong>No trade-off discussion</strong> — designing without justifying choices</li><li><strong>Passive</strong> — waiting for hints instead of driving the conversation</li><li><strong>Ignoring failure scenarios</strong> — not discussing what happens when things break</li></ul>`,callout:{type:"warn",title:"⚠️ Common Mistake",body:"Many candidates start coding immediately. Never write code in a system design interview. Draw boxes, arrows, and talk through the architecture at a high level first."}},
+{h2:"Preparation Strategy",body:`<p>How long to prepare depends on your current level:</p><table class="comp-table"><thead><tr><th>Experience</th><th>Preparation Time</th></tr></thead><tbody><tr><td>Junior (0–2 years)</td><td>3–4 months, daily 1-hour sessions</td></tr><tr><td>Mid-level (2–5 years)</td><td>6–8 weeks focused practice</td></tr><tr><td>Senior (5+ years)</td><td>3–4 weeks to structure existing knowledge</td></tr></tbody></table>`,callout:{type:"success",title:"Best Practice",body:"Do at least 2 mock interviews per week. Recording yourself and reviewing the replay is one of the fastest ways to spot weaknesses in your communication style."}},
+],quiz:[
+{q:"What does the 'R' in RESHADED stand for?",opts:["Response Design","Requirements Clarification","Reliability Testing","Resource Allocation"],correct:1,exp:"Requirements Clarification is always first — you must understand what you're building before you can design it."},
+{q:"You're asked to 'Design Twitter'. What's your FIRST move?",opts:["Draw a database schema","Pick a programming language","Ask clarifying questions about scale and features","Start explaining microservices"],correct:2,exp:"Always clarify before designing! Ask: how many users? Read-heavy or write-heavy? Which features matter most? This shapes every decision."},
+]}},
+{id:3,title:"Preliminary Concepts",tag:"Foundations",time:"15 min",content:{intro:"Before designing systems, you must understand the fundamental abstractions: how services communicate, what consistency means, and how failures occur in distributed environments.",sections:[
+{h2:"Abstractions in System Design",body:`<p>An <strong>abstraction</strong> hides complexity. When you drive a car, you do not need to understand the engine — you just use the steering wheel. In system design, abstractions let engineers build on complex systems without worrying about inner details.</p><table class="comp-table"><thead><tr><th>Abstraction</th><th>Real-Life Equivalent</th></tr></thead><tbody><tr><td>API</td><td>A restaurant menu — you order without knowing how the kitchen works</td></tr><tr><td>Database</td><td>A filing cabinet — you store and retrieve without knowing disk mechanics</td></tr><tr><td>Cache</td><td>Your desk — quick access to things you use often</td></tr><tr><td>Load Balancer</td><td>A traffic officer — directs cars to open lanes</td></tr><tr><td>Message Queue</td><td>A post office — messages delivered asynchronously, no waiting required</td></tr></tbody></table>`},
+{h2:"Remote Procedure Calls (RPC)",body:`<p>RPC lets one computer call a function on another computer as if it were local. It abstracts away all the network complexity.</p><div class="code-block">Client Machine                    Server Machine
+    |                                     |
+    |-- getUser(userId=5) ----------->    |
+    |                                     |  (runs the function)
+    |<-- returns { name:"Alice" } --------|
+    |                                     |
+Modern implementations: gRPC (Google), REST, GraphQL
+Each solves the same core problem: clean service-to-service communication.</div>`},
+{h2:"Spectrum of Consistency Models",body:`<p>Consistency means: when you read data, do you get the most up-to-date version?</p><table class="comp-table"><thead><tr><th>Model</th><th>What It Means</th><th>Example</th></tr></thead><tbody><tr><td><strong>Strong Consistency</strong></td><td>Every read gets the latest write. Slowest.</td><td>Bank balance — must be exact</td></tr><tr><td><strong>Eventual Consistency</strong></td><td>Reads might be stale, but will sync later. Fastest.</td><td>Facebook like count</td></tr><tr><td><strong>Causal Consistency</strong></td><td>Causally related events appear in the correct order.</td><td>Replies appear after their parent post</td></tr><tr><td><strong>Read-your-writes</strong></td><td>You always see your own writes immediately.</td><td>Your own profile updates</td></tr></tbody></table>`,callout:{type:"warn",title:"💡 Trade-off",body:"Strong consistency = slower but accurate. Eventual consistency = faster but may show stale data. Choose based on use case. Banks need strong. Social feeds can use eventual."}},
+{h2:"The Spectrum of Failure Models",body:`<table class="comp-table"><thead><tr><th>Failure Type</th><th>What Happens</th><th>Defense</th></tr></thead><tbody><tr><td>Fail-Stop</td><td>Component stops and notifies others</td><td>Health checks + auto-restart</td></tr><tr><td>Crash Failure</td><td>Component stops without warning</td><td>Timeouts + circuit breakers</td></tr><tr><td>Omission Failure</td><td>Some messages dropped silently</td><td>Acknowledgments + retries</td></tr><tr><td>Byzantine Failure</td><td>Component behaves unpredictably or maliciously</td><td>Consensus algorithms (Raft, PBFT)</td></tr></tbody></table>`},
+],quiz:[
+{q:"An e-commerce site shows '3 items left in stock' but the real count is 2. Which consistency model allows this?",opts:["Strong Consistency","Causal Consistency","Eventual Consistency","Linearizability"],correct:2,exp:"Eventual consistency allows temporary stale reads. The inventory will eventually sync. This is acceptable for stock counts — just add oversell protection downstream."},
+{q:"A bank must ensure that when money is debited from Account A, it is always credited to Account B — even if a server crashes mid-transfer. Which failure model concerns you most?",opts:["Fail-Stop","Omission Failure","Crash Failure","Byzantine Failure"],correct:2,exp:"A crash failure mid-transaction is the primary concern. The solution is ACID database transactions — if the server crashes, the transaction rolls back atomically, preventing partial updates."},
+]}},
+{id:4,title:"Non-Functional Requirements",tag:"Foundations",time:"14 min",content:{intro:"Functional requirements describe WHAT a system does. Non-functional requirements describe HOW WELL it does it — and they often determine your entire architecture.",sections:[
+{h2:"Availability: The Nines",body:`<table class="comp-table"><thead><tr><th>Availability</th><th>Downtime / Year</th><th>Typical Use Case</th></tr></thead><tbody><tr><td>99% (two nines)</td><td>3.65 days</td><td>Internal tools, blogs</td></tr><tr><td>99.9% (three nines)</td><td>8.76 hours</td><td>E-commerce sites</td></tr><tr><td>99.99% (four nines)</td><td>52.6 minutes</td><td>Payment gateways</td></tr><tr><td>99.999% (five nines)</td><td>5.26 minutes</td><td>Hospitals, banking core systems</td></tr></tbody></table>`,callout:{type:"warn",title:"🏥 Why It Matters",body:"A hospital system going down for 8 hours can be life-threatening. A personal blog going down is inconvenient. Design your availability target based on how critical the system is — and know that every extra nine costs significantly more."}},
+{h2:"Reliability vs. Availability",body:`<p>These are often confused but distinct concepts:</p><ul><li><strong>Availability</strong> — Is the system running and reachable?</li><li><strong>Reliability</strong> — When running, does it produce correct results?</li></ul><p>A system can be highly available (always up) but unreliable (giving wrong answers). A calculator that is always on but gives wrong results is available but not reliable. You need both.</p>`},
+{h2:"Scalability: Up vs. Out",body:`<div class="code-block">Vertical Scaling (Scale Up):      Horizontal Scaling (Scale Out):
+
+  [HUGE Server]                     [Server 1] [Server 2] [Server 3]
+  (1 powerful machine)              (many smaller machines)
+
+  Limit: hardware ceiling            Limit: almost unlimited
+  Cost:  exponential                 Cost: linear
+  HA:    single point of failure     HA:   redundant by nature
+  
+  Use for: databases (initially)     Use for: stateless app servers</div>`},
+{h2:"Maintainability",body:`<p>Maintainability measures how easy it is to:</p><ul><li><strong>Operate</strong> — Run and monitor the system day-to-day</li><li><strong>Evolve</strong> — Add new features without breaking existing ones</li><li><strong>Debug</strong> — Find and fix problems quickly</li></ul><p>A maintainable system has good documentation, modular components, comprehensive logging, and clear ownership. This often matters more than raw performance.</p>`},
+{h2:"Fault Tolerance Techniques",body:`<table class="comp-table"><thead><tr><th>Technique</th><th>How It Works</th></tr></thead><tbody><tr><td>Replication</td><td>Copy data and services across multiple nodes</td></tr><tr><td>Retry with backoff</td><td>Retry failed requests with increasing delays</td></tr><tr><td>Circuit Breaker</td><td>Stop calling a failing service to prevent cascade failures</td></tr><tr><td>Bulkhead</td><td>Isolate components so one failure can't sink everything</td></tr><tr><td>Checkpointing</td><td>Save progress periodically so recovery resumes from checkpoint</td></tr></tbody></table>`,callout:{type:"info",title:"✈️ Airplane Analogy",body:"Airplanes have redundant engines, navigation systems, and hydraulics. If one fails, others take over. In distributed systems, we replicate components so one failure does not bring down the entire system."}},
+],quiz:[
+{q:"A startup wants 99.9% availability. How much downtime per year does that allow?",opts:["52.6 minutes","8.76 hours","3.65 days","0 — 99.9% means always up"],correct:1,exp:"99.9% = 0.1% downtime. 0.001 × 365 × 24 = 8.76 hours/year. This is the three-nines SLA common for commercial web services."},
+{q:"Netflix needs to handle 2× traffic spikes during major releases. Which scaling approach is most suitable?",opts:["Vertical — buy one huge server","Horizontal — add servers dynamically via auto-scaling","Neither — let some users wait","Database replication only"],correct:1,exp:"Horizontal auto-scaling adds servers when traffic spikes and removes them after. This is elastic and cost-effective. Vertical scaling hits hardware limits and doesn't give redundancy."},
+]}},
+{id:5,title:"Back-of-the-Envelope Calculations",tag:"Foundations",time:"16 min",content:{intro:"Before designing a system, you need to estimate its scale. These rough calculations help you choose the right architecture and justify your design decisions in interviews.",sections:[
+{h2:"Essential Numbers to Memorize",body:`<table class="comp-table"><thead><tr><th>Unit</th><th>Value</th><th>Mental Model</th></tr></thead><tbody><tr><td>1 KB</td><td>1,000 bytes</td><td>One short email</td></tr><tr><td>1 MB</td><td>1,000 KB</td><td>One JPEG photo</td></tr><tr><td>1 GB</td><td>1,000 MB</td><td>One movie (compressed)</td></tr><tr><td>1 TB</td><td>1,000 GB</td><td>1,000 movies</td></tr><tr><td>1 PB</td><td>1,000 TB</td><td>YouTube daily upload volume</td></tr><tr><td>Memory latency</td><td>~100 ns</td><td>Almost instant</td></tr><tr><td>SSD read</td><td>~100 µs</td><td>1,000× slower than memory</td></tr><tr><td>Network round-trip</td><td>~50 ms</td><td>500,000× slower than memory</td></tr><tr><td>Seconds in a day</td><td>86,400</td><td>Memorize this for RPS calculations</td></tr></tbody></table>`},
+{h2:"Worked Example: Twitter Scale",body:`<div class="code-block"><span class="code-lbl">ESTIMATION</span>Given: 300M monthly active users, 100M daily active, 2 tweets/user/day
+
+Write throughput:
+  Daily tweets   = 100M × 2         = 200M tweets/day
+  Write RPS      = 200M / 86,400    ≈ 2,300 tweets/second
+
+Storage per tweet:
+  Text           = 280 chars        ≈ 280 bytes
+  Metadata       = user_id, time…   ≈ 500 bytes
+  Total          ≈ 1 KB per tweet
+
+Daily storage (text only):
+  200M × 1 KB = 200 GB/day
+  Annual text  = 200 GB × 365 ≈ 73 TB/year
+
+With media (10–100× multiplier):
+  Annual total estimate: 730 TB → 7.3 PB/year
+
+Read throughput:
+  Users read ~50 tweets/day
+  Read RPS = (100M × 50) / 86,400 ≈ 58,000 reads/sec
+
+  Read : Write ratio ≈ 25:1 → optimize reads with caching!</div>`,callout:{type:"success",title:"💡 Key Insight",body:"Most systems are read-heavy. Twitter is ~25× more reads than writes. This immediately tells you: add Redis caches and CDNs for reads. Writes can go to a single primary database."}},
+{h2:"Common Estimation Mistakes",body:`<ul><li><strong>Off by 1000×</strong> — confusing MB with GB, or KB with MB. Always double-check units.</li><li><strong>Forgetting replication</strong> — storage needs 3× multiplier for 3-replica redundancy</li><li><strong>Ignoring growth</strong> — estimate for 2–5 years out, not just today's traffic</li><li><strong>Assuming linear scaling</strong> — caches and indexes mean real systems often scale sublinearly</li></ul>`},
+],quiz:[
+{q:"Instagram users upload 100M photos/day at ~3 MB average. How much raw storage per year?",opts:["~110 TB/year","~1.1 PB/year","~10 PB/year","~30 TB/year"],correct:1,exp:"100M × 3 MB = 300 GB/day. 300 GB × 365 = ~109 TB ≈ 1.1 PB/year (before replication multiplier). This is why Instagram uses blob storage like Amazon S3, not a database."},
+{q:"A server handles 500 RPS. How many servers for 100,000 RPS with 20% headroom?",opts:["200 servers","240 servers","100 servers","500 servers"],correct:1,exp:"100,000 / 500 = 200 servers at exact load. Add 20% headroom: 200 × 1.2 = 240 servers. Always provision extra capacity for traffic spikes."},
+]}},
+{id:6,title:"Building Blocks Overview",tag:"Core Components",time:"10 min",content:{intro:"Every large system is assembled from reusable building blocks. Understanding each one deeply is the foundation of system design. Think of them as LEGO pieces — you combine them differently for each system.",sections:[
+{h2:"The Core Building Blocks",body:`<table class="comp-table"><thead><tr><th>Building Block</th><th>Purpose</th><th>Examples</th></tr></thead><tbody><tr><td>DNS</td><td>Translate domain names to IP addresses</td><td>Route 53, Cloudflare DNS</td></tr><tr><td>Load Balancer</td><td>Distribute traffic across servers</td><td>Nginx, AWS ALB, HAProxy</td></tr><tr><td>Database</td><td>Persistent structured data storage</td><td>MySQL, PostgreSQL, DynamoDB</td></tr><tr><td>Cache</td><td>Fast temporary data store</td><td>Redis, Memcached</td></tr><tr><td>CDN</td><td>Serve static content from edge servers</td><td>Cloudflare, Akamai, CloudFront</td></tr><tr><td>Message Queue</td><td>Async communication between services</td><td>Kafka, RabbitMQ, SQS</td></tr><tr><td>Blob Store</td><td>Store large unstructured files</td><td>Amazon S3, Google GCS</td></tr><tr><td>Rate Limiter</td><td>Prevent abuse and enforce quotas</td><td>API gateways, Redis counters</td></tr></tbody></table>`},
+{h2:"How They Connect",body:`<div class="code-block">Typical Request Flow:
+
+Browser → DNS (resolves domain)
+       → CDN (serves cached static assets)
+       → Load Balancer (distributes to healthy servers)
+       → App Server (processes business logic)
+       → Cache (fast reads: Redis)
+       → Database (persistent reads/writes)
+       → Message Queue (async: emails, notifications, analytics)
+       → Blob Store (images, videos, documents)</div>`,callout:{type:"info",title:"🔑 Key Insight",body:"The rest of this course covers each building block in depth. Understanding them individually, and knowing when to combine them, is what lets you design any system confidently."}},
+],quiz:[
+{q:"You're building a photo-sharing app. Which building block is MOST critical for serving photos fast globally?",opts:["Message Queue","CDN","Rate Limiter","Sequencer"],correct:1,exp:"A CDN caches photos at edge servers worldwide, serving them from the nearest location. This reduces latency from 200ms to under 10ms — essential for any media-heavy application."},
+]}},
+{id:7,title:"Domain Name System (DNS)",tag:"Core Components",time:"13 min",content:{intro:"DNS is the internet's phone book. It translates human-readable domain names like 'google.com' into machine-readable IP addresses — and does so with a clever hierarchical architecture that handles billions of queries per day.",sections:[
+{h2:"How DNS Resolution Works",body:`<div class="code-block">You type: www.google.com
+
+Step 1: Browser cache         → Not found, continue
+Step 2: OS cache              → Not found, continue
+Step 3: Recursive Resolver    → Not found (your ISP's DNS)
+Step 4: Root Name Server      → "Ask the .com TLD server"
+Step 5: TLD Server (.com)     → "Ask Google's authoritative server"
+Step 6: Google's Auth Server  → Returns: 142.250.80.46
+Step 7: Browser connects      → Page loads!
+
+Each result is cached at every level with a TTL (Time To Live).
+Second user asking for google.com? Skip to cached step!</div>`},
+{h2:"DNS Record Types",body:`<table class="comp-table"><thead><tr><th>Record Type</th><th>Purpose</th><th>Example</th></tr></thead><tbody><tr><td>A Record</td><td>Domain → IPv4 address</td><td>google.com → 142.250.80.46</td></tr><tr><td>AAAA Record</td><td>Domain → IPv6 address</td><td>google.com → 2607:f8b0::200e</td></tr><tr><td>CNAME</td><td>Domain → another domain (alias)</td><td>www → mysite.github.io</td></tr><tr><td>MX</td><td>Mail server for domain</td><td>google.com → mail.google.com</td></tr><tr><td>TXT</td><td>Text metadata (e.g., SPF verification)</td><td>v=spf1 include:google.com</td></tr></tbody></table>`},
+{h2:"DNS in System Design",body:`<p>DNS does more than translate names. At scale it provides:</p><ul><li><strong>Load Balancing</strong> — Return different IPs for the same domain (round-robin DNS)</li><li><strong>Geo-routing</strong> — Return the nearest server's IP based on user location</li><li><strong>Health-based failover</strong> — Remove unhealthy server IPs automatically</li><li><strong>Traffic splitting</strong> — Route 10% to canary servers, 90% to stable</li></ul>`,callout:{type:"warn",title:"⚠️ Common Misconception",body:"DNS changes are NOT instant. A TTL of 3600 means users may get the old IP for up to 1 hour. Best practice before a migration: lower TTL to 60 seconds 24 hours in advance, make the change, then raise TTL back."}},
+],quiz:[
+{q:"A company changes their server IP. Users in some regions still get the old IP for several hours. Why?",opts:["The DNS server crashed","Old IP is cached due to TTL","The users' browsers are buggy","The load balancer is misconfigured"],correct:1,exp:"TTL (Time To Live) tells DNS resolvers how long to cache a result. If TTL was 3600 (1 hour), users see the old IP for up to 1 hour. Always lower TTL before planned IP changes."},
+]}},
+{id:8,title:"Load Balancers",tag:"Core Components",time:"14 min",content:{intro:"A load balancer distributes incoming traffic across multiple servers so no single server gets overwhelmed. It is the traffic cop of your infrastructure — and a critical component for both performance and fault tolerance.",sections:[
+{h2:"Load Balancing Algorithms",body:`<table class="comp-table"><thead><tr><th>Algorithm</th><th>How It Works</th><th>Best For</th></tr></thead><tbody><tr><td>Round Robin</td><td>Rotate through servers in sequence</td><td>Servers with similar capacity, short requests</td></tr><tr><td>Weighted Round Robin</td><td>Bigger servers get more traffic proportionally</td><td>Mixed server sizes</td></tr><tr><td>Least Connections</td><td>Route to server with fewest active connections</td><td>Long-lived connections (WebSocket, file uploads)</td></tr><tr><td>IP Hash</td><td>Same client IP always goes to same server</td><td>Session-sticky applications</td></tr><tr><td>Least Response Time</td><td>Route to server with lowest measured latency</td><td>Latency-sensitive services</td></tr></tbody></table>`},
+{h2:"Layer 4 vs. Layer 7 Load Balancing",body:`<table class="comp-table"><thead><tr><th>Type</th><th>Works At</th><th>Capability</th><th>Speed</th></tr></thead><tbody><tr><td>Layer 4 (Transport)</td><td>TCP/UDP level</td><td>Route by IP + port only</td><td>Very fast</td></tr><tr><td>Layer 7 (Application)</td><td>HTTP level</td><td>Route by URL path, headers, cookies, content</td><td>Slightly slower</td></tr></tbody></table><p>Example Layer 7 routing: <code>/api/*</code> routes to API servers, <code>/images/*</code> routes directly to image CDN, <code>/admin/*</code> routes to separate admin cluster.</p>`},
+{h2:"Health Checks and Automatic Failover",body:`<div class="code-block">Load Balancer checks every 30 seconds:
+  GET /health → Server 1: 200 OK     → HEALTHY ✓
+  GET /health → Server 2: TIMEOUT    → UNHEALTHY ✗ (removed from pool)
+  GET /health → Server 3: 200 OK     → HEALTHY ✓
+
+When Server 2 recovers:
+  GET /health → Server 2: 200 OK → re-added automatically ✓
+
+Users experience: ~1-2 slow requests during failure, then seamless.</div>`,callout:{type:"success",title:"Zero-Downtime Failover",body:"This is how modern systems survive server crashes without user impact. The load balancer detects failure within seconds and stops routing there. Combined with auto-scaling, new servers spin up automatically."}},
+{h2:"The Load Balancer as a Single Point of Failure",body:`<p>The load balancer itself can fail! Solution: Deploy load balancers in pairs with a virtual IP (VIP). If the active one fails, the passive one takes over in under a second using protocols like VRRP. Cloud-managed load balancers (AWS ALB, GCP LB) handle this for you automatically.</p>`},
+],quiz:[
+{q:"You're building a real-time chat app where each connection is long-lived. Which LB algorithm prevents sessions from being split across servers?",opts:["Round Robin","IP Hash / Sticky Sessions","Least Connections","Random"],correct:1,exp:"IP Hash always routes the same client IP to the same server. This keeps the user's connection on one server throughout the session — critical for stateful applications that store session data in memory."},
+]}},
+{id:9,title:"Databases Deep Dive",tag:"Core Components",time:"22 min",content:{intro:"The database is the heart of almost every system. Choosing the right type and configuring it correctly is one of the most impactful architectural decisions you will make.",sections:[
+{h2:"SQL vs. NoSQL",body:`<table class="comp-table"><thead><tr><th>Feature</th><th>SQL (Relational)</th><th>NoSQL</th></tr></thead><tbody><tr><td>Structure</td><td>Tables with rows and columns</td><td>Documents, key-value, graphs, columns</td></tr><tr><td>Schema</td><td>Fixed — define upfront</td><td>Dynamic — add fields anytime</td></tr><tr><td>Scaling</td><td>Vertical primary; horizontal harder</td><td>Designed for horizontal scale</td></tr><tr><td>ACID Transactions</td><td>Yes — strong guarantees</td><td>Often eventual consistency</td></tr><tr><td>Best For</td><td>Financial data, user accounts, orders</td><td>Social feeds, catalogs, IoT, sessions</td></tr><tr><td>Examples</td><td>MySQL, PostgreSQL, SQLite</td><td>MongoDB, Cassandra, DynamoDB, Redis</td></tr></tbody></table>`,callout:{type:"info",title:"💡 Rule of Thumb",body:"Use SQL when you need complex queries, joins, and ACID transactions (money, orders, accounts). Use NoSQL when you need horizontal scale and flexible schemas (social feeds, product catalogs, sensor data)."}},
+{h2:"Types of NoSQL Databases",body:`<table class="comp-table"><thead><tr><th>Type</th><th>Data Model</th><th>Best For</th><th>Example</th></tr></thead><tbody><tr><td>Key-Value</td><td>key → value (any format)</td><td>Sessions, caching, rate limiting</td><td>Redis, DynamoDB</td></tr><tr><td>Document</td><td>JSON-like nested documents</td><td>Product catalogs, user profiles</td><td>MongoDB, CouchDB</td></tr><tr><td>Column-Family</td><td>Rows with many sparse columns</td><td>Time-series, analytics, IoT</td><td>Cassandra, HBase</td></tr><tr><td>Graph</td><td>Nodes and edges (relationships)</td><td>Social networks, fraud detection</td><td>Neo4j, Amazon Neptune</td></tr></tbody></table>`},
+{h2:"The CAP Theorem",body:`<p>In a distributed database, you can guarantee only <strong>2 of these 3</strong> properties:</p><ul><li><strong>C — Consistency:</strong> Every read gets the most recent write</li><li><strong>A — Availability:</strong> Every request receives a response</li><li><strong>P — Partition Tolerance:</strong> System continues despite network partitions</li></ul><p>Since network partitions always happen in real systems, you are really choosing between <strong>CP</strong> (consistent, may be briefly unavailable) or <strong>AP</strong> (always available, may be briefly stale).</p>`,callout:{type:"warn",title:"CAP in Practice",body:"Banks choose CP — your balance must be accurate even if the app is briefly unavailable. Social media feeds choose AP — it is fine to show a 30-second-old like count as long as the page loads instantly."}},
+{h2:"Data Replication",body:`<table class="comp-table"><thead><tr><th>Strategy</th><th>How It Works</th><th>Trade-off</th></tr></thead><tbody><tr><td>Primary-Replica (Master-Slave)</td><td>One node handles all writes; replicas serve reads</td><td>Simple but primary is a bottleneck</td></tr><tr><td>Multi-Primary</td><td>Multiple nodes accept writes; conflicts resolved</td><td>Complex conflict resolution needed</td></tr><tr><td>Synchronous</td><td>Write confirmed only after all replicas confirm</td><td>Strong consistency, higher write latency</td></tr><tr><td>Asynchronous</td><td>Write confirmed on primary; replicas catch up</td><td>Lower latency, risk of stale reads</td></tr></tbody></table>`},
+{h2:"Sharding: Splitting Data Across Servers",body:`<div class="code-block">Without Sharding:                  With Sharding (by User ID):
+
+[All 1B users on 1 server]        [0–333M]   [333M–666M]  [666M–1B]
+[Server OVERLOADED]                Shard 1     Shard 2      Shard 3
+
+Sharding strategies:
+  Range-based:  A-M → Shard 1, N-Z → Shard 2
+                Risk: "hotspots" if one range is more popular
+  
+  Hash-based:   shard = hash(user_id) % num_shards
+                Even distribution; re-sharding is expensive
+  
+  Directory:    Lookup table maps keys to shards
+                Most flexible; lookup table can bottleneck</div>`},
+],quiz:[
+{q:"A fintech startup stores transaction records. Which database should they choose?",opts:["MongoDB (document store)","Redis (key-value)","PostgreSQL (relational SQL)","Cassandra (column-family)"],correct:2,exp:"Financial transactions require ACID guarantees — debiting Account A and crediting Account B must be atomic. PostgreSQL with strong consistency is the right choice. NoSQL databases often sacrifice these guarantees for speed."},
+{q:"Your system needs to keep serving requests even during a network partition, accepting that some data may be slightly stale. Which CAP trade-off do you choose?",opts:["CP — Consistent + Partition Tolerant","CA — Consistent + Available","AP — Available + Partition Tolerant","None of the above"],correct:2,exp:"AP (Available + Partition Tolerant) means the system always responds, even during partitions, potentially with slightly stale data. This is what Cassandra, DynamoDB (with eventual consistency), and many high-availability systems choose."},
+]}},
+{id:10,title:"Key-Value Store Design",tag:"Core Components",time:"13 min",content:{intro:"Key-value stores are the simplest and fastest type of database. Designing one from scratch teaches foundational distributed systems concepts — consistent hashing, quorums, and versioning — that appear in interviews constantly.",sections:[
+{h2:"Core Operations and Use Cases",body:`<div class="code-block">Operations:
+  SET user:123  → { name:"Alice", age:30 }     (write)
+  GET user:123  → { name:"Alice", age:30 }     (read)
+  DEL user:123  → (deleted)                    (delete)
+  TTL user:123 3600 → expires in 1 hour        (expiry)
+
+Common use cases:
+  • User sessions    SET session:abc → { userId:123, exp:1h }
+  • Rate limiting    INCR rate:ip:1.2.3.4  (atomic increment)
+  • Caching          SET db:query:hash → { result... }
+  • Feature flags    GET feature:dark_mode → true/false
+  • Leaderboards     ZADD leaderboard 9500 "Alice"</div>`},
+{h2:"Consistent Hashing: Distributed Without Pain",body:`<div class="code-block">Naive hashing:  node = hash(key) % 3
+  Add 4th server → rehash → 75% of keys must MOVE (catastrophic!)
+
+Consistent Hashing:
+  Place servers on a virtual ring (0 to 2^32)
+  Each key hashes to the nearest server clockwise
+
+        [Node A: 0°–90°]
+       /                  \\
+[Node D: 270°–360°]   [Node B: 90°–180°]
+       \\                  /
+        [Node C: 180°–270°]
+
+  Add new node between A and B?
+    Only ~25% of keys (A's range) need to move
+  
+  Remove a node? Only its keys move to the next node.
+  Virtual nodes: each physical server gets multiple positions
+  for even distribution.</div>`,callout:{type:"success",title:"Where This Is Used",body:"Consistent hashing powers Amazon DynamoDB, Apache Cassandra, Redis Cluster, Memcached, and many CDN systems. Mastering this one concept gives you huge leverage in system design interviews."}},
+{h2:"Quorum: Balancing Consistency and Availability",body:`<p>With N replicas for each key, use quorum for reads and writes:</p><ul><li><strong>W</strong> = number of nodes that must confirm a write</li><li><strong>R</strong> = number of nodes that must respond to a read</li><li>For strong consistency: <strong>W + R &gt; N</strong></li></ul><div class="code-block">Example: N=3, W=2, R=2
+
+Write: "user:123" → needs 2/3 nodes to confirm  ✓
+Read:  "user:123" → reads from 2/3 nodes, returns newest version
+
+W+R = 4 > 3 = N → strong consistency guaranteed
+
+For high availability: W=1, R=1 (W+R=2, not > N=3 → eventual consistency)</div>`},
+],quiz:[
+{q:"Why is consistent hashing better than simple modulo hashing for distributed key-value stores?",opts:["It is faster to compute","Adding/removing nodes only moves a small fraction of keys","It uses less memory","It guarantees stronger consistency"],correct:1,exp:"With hash(key) % n_servers, adding one server remaps ~83% of all keys — catastrophic for a live system. Consistent hashing only moves ~1/n of keys per added server, enabling seamless scaling."},
+]}},
+{id:11,title:"Content Delivery Network (CDN)",tag:"Core Components",time:"12 min",content:{intro:"A CDN is a globally distributed network of servers that caches and delivers content to users from the nearest location — reducing latency from hundreds of milliseconds to single digits.",sections:[
+{h2:"How a CDN Works",body:`<div class="code-block">Without CDN:                       With CDN:
+
+User in India                      User in India
+    |  (~200ms)                         |  (~10ms)
+    v                                   v
+[Origin Server - USA]             [CDN Edge - Mumbai]
+                                        |
+                               (cache miss → fetches from USA)
+                               (cache hit  → serves immediately)
+
+CDN edge servers: 100s of locations worldwide
+Popular content cached: served locally
+Unpopular content: proxied to origin on first request</div>`,callout:{type:"info",title:"🍕 Analogy",body:"A CDN is like a pizza chain with locations in every neighborhood. Instead of one central kitchen, each neighborhood has its own. Your pizza arrives hot because it is made nearby."}},
+{h2:"Push vs. Pull CDN",body:`<table class="comp-table"><thead><tr><th>Type</th><th>How It Works</th><th>Best For</th></tr></thead><tbody><tr><td>Push CDN</td><td>You upload content to CDN in advance</td><td>Static assets that rarely change (videos, software downloads)</td></tr><tr><td>Pull CDN</td><td>CDN fetches from origin on first request, then caches</td><td>Dynamic websites where you can't predict all content upfront</td></tr></tbody></table>`},
+{h2:"Cache Invalidation",body:`<table class="comp-table"><thead><tr><th>Strategy</th><th>How It Works</th><th>Trade-off</th></tr></thead><tbody><tr><td>TTL</td><td>Content expires after N seconds automatically</td><td>Simple but stale during the TTL window</td></tr><tr><td>Cache Purge API</td><td>Manually delete specific cached URL</td><td>Immediate but requires an API call per update</td></tr><tr><td>Versioned URLs</td><td>style.css → style-v3.css on every deploy</td><td>Old URL serves old file; never expires naturally</td></tr></tbody></table>`,callout:{type:"warn",title:"⚠️ Hot Tip",body:"For JavaScript and CSS files in production, always use versioned filenames or content-hash URLs (style.abc123.css). Set long TTLs (1 year). This gives both maximum cache efficiency and instant updates on deploy."}},
+],quiz:[
+{q:"Netflix serves 4K videos to users in 190 countries. What's the primary reason they use a CDN?",opts:["To reduce server costs by 50%","To serve videos from servers physically close to users, reducing buffering","To encrypt video content","To prevent video piracy"],correct:1,exp:"CDN edge servers cache video chunks near users globally. A user in Germany gets video from a Frankfurt edge server, not Los Gatos, CA. This reduces latency from 200ms to under 20ms — essential for smooth streaming."},
+]}},
+{id:12,title:"Sequencer & Unique ID Generation",tag:"Core Components",time:"11 min",content:{intro:"In distributed systems with many servers, how do you generate unique IDs without a central bottleneck? This is a deceptively hard problem that every large-scale system must solve.",sections:[
+{h2:"Why Simple Auto-Increment Fails",body:`<p>A single database auto-increment (1, 2, 3…) seems simple but has critical problems at scale:</p><ul><li><strong>Bottleneck</strong> — all ID generation goes through one database</li><li><strong>Single point of failure</strong> — database down means IDs stop</li><li><strong>Not globally unique</strong> — two databases might both generate ID=1</li></ul><p>You need a way to generate millions of unique IDs per second, across hundreds of servers, without coordination.</p>`},
+{h2:"Approaches Compared",body:`<table class="comp-table"><thead><tr><th>Approach</th><th>How It Works</th><th>Pros</th><th>Cons</th></tr></thead><tbody><tr><td>UUID v4</td><td>128-bit random number</td><td>Simple, no coordination</td><td>Large (16 bytes), not sortable by time, random lookups</td></tr><tr><td>Twitter Snowflake</td><td>64-bit: timestamp + machine ID + sequence</td><td>Compact, sortable, fast</td><td>Requires synchronized clocks</td></tr><tr><td>DB Auto-Increment</td><td>Single DB increments a counter</td><td>Simple, sortable</td><td>Single point of failure, bottleneck</td></tr><tr><td>Ticket Server (Flickr)</td><td>Dedicated DB server generates IDs</td><td>Sortable, centralized</td><td>Still a single point of failure</td></tr></tbody></table>`},
+{h2:"Twitter Snowflake: The Gold Standard",body:`<div class="code-block">64-bit Snowflake ID Layout:
+
+| 1 bit  | 41 bits          | 10 bits     | 12 bits          |
+| unused | timestamp (ms)   | machine ID  | sequence counter |
+
+Timestamp: milliseconds since Jan 1, 2010 (Twitter epoch)
+Machine ID: 5 bits datacenter + 5 bits machine = 1024 machines
+Sequence:   4096 IDs per millisecond per machine
+
+Throughput: 4096 × 1000ms × 1024 machines = ~4 billion IDs/sec!
+
+Sortability: Higher timestamp → higher ID value
+  → IDs naturally sort chronologically in database indexes
+  → "Recent tweets" queries are just a range scan on IDs</div>`,callout:{type:"success",title:"Why Sorting Matters",body:"When tweet IDs are sortable by time, fetching the latest 50 tweets is a simple range scan on the primary key. Non-sortable UUIDs require a separate timestamp index — slower and more expensive."}},
+{h2:"Causality and Logical Clocks",body:`<p>Physical clocks drift in distributed systems. If Message A causes Message B (a reply), B must always appear after A — even if different servers' clocks disagree. Solutions:</p><ul><li><strong>Lamport Timestamps</strong> — logical counter, incremented on each event and message</li><li><strong>Vector Clocks</strong> — per-node counter array, captures full causal history</li></ul>`},
+],quiz:[
+{q:"A distributed system generates Snowflake IDs. Why can IDs be used to sort tweets chronologically without a separate 'created_at' column?",opts:["They can't — you always need a timestamp","The first 41 bits encode the timestamp, so higher ID always means later tweet","Twitter sorts manually after fetching","UUIDs are also sortable by time"],correct:1,exp:"Snowflake's 41-bit timestamp prefix means numerically larger IDs were created later. This makes the ID itself the sort key — fetching recent items is a cheap index range scan rather than a full sort on a separate column."},
+]}},
+{id:13,title:"Distributed Monitoring",tag:"Core Components",time:"15 min",content:{intro:"In a distributed system with 100 servers, when something goes wrong at 3am, how do you know? Monitoring is your system's nervous system — without it you are flying blind.",sections:[
+{h2:"The Three Pillars of Observability",body:`<table class="comp-table"><thead><tr><th>Pillar</th><th>What It Captures</th><th>Example</th><th>Tools</th></tr></thead><tbody><tr><td>Metrics</td><td>Numerical measurements over time</td><td>CPU: 75%, Latency p99: 210ms</td><td>Prometheus, Datadog, CloudWatch</td></tr><tr><td>Logs</td><td>Timestamped event records</td><td>ERROR: DB connection failed at 03:14</td><td>ELK Stack, Loki, Splunk</td></tr><tr><td>Traces</td><td>End-to-end request journey</td><td>Request took 800ms: 10ms API + 790ms DB</td><td>Jaeger, Zipkin, AWS X-Ray</td></tr></tbody></table>`,callout:{type:"info",title:"💡 When to Use Which",body:"Metrics tell you WHAT is wrong (error rate spiked). Logs tell you WHAT HAPPENED (specific error messages). Traces tell you WHERE time is going (which service is slow). Use all three together for full observability."}},
+{h2:"Monitoring Architecture",body:`<div class="code-block">Services (App, DB, Cache, Queue)
+       |
+[Metrics Agent on each server]  (collects CPU, mem, custom metrics)
+       |
+[Ingestion Pipeline]  (Kafka streams high-volume metrics)
+       |
+[Time-Series DB]  (Prometheus, InfluxDB — optimized for numeric data)
+       |
+[Visualization]  (Grafana dashboards — graphs, heatmaps, alerts)
+       |
+[Alert Manager]  → PagerDuty → SMS/Phone to on-call engineer</div>`},
+{h2:"SLIs, SLOs, and SLAs",body:`<ul><li><strong>SLI</strong> (Service Level Indicator) — A metric you measure: "% of requests completing in &lt;200ms"</li><li><strong>SLO</strong> (Service Level Objective) — Your internal target: "95% of requests under 200ms"</li><li><strong>SLA</strong> (Service Level Agreement) — Customer contract: "We guarantee 99.9% uptime or credit your bill"</li></ul>`,callout:{type:"success",title:"Real Example",body:"SLI: API success rate. SLO: 99.9% success rate. SLA: If we drop below 99.5% in a month, customers get a 10% service credit. SLOs are stricter than SLAs — you want to catch issues internally before they breach the customer-facing guarantee."}},
+{h2:"Structured Logging Best Practice",body:`<div class="code-block">Bad:  "ERROR: User 123 payment failed"
+
+Good: {
+  "level": "ERROR",
+  "service": "payment-service",
+  "userId": 123,
+  "orderId": 456,
+  "traceId": "abc-def-123",
+  "error": "Card declined — insufficient funds",
+  "timestamp": "2024-01-15T15:05:32.441Z"
+}
+
+Why JSON logs matter:
+  → Machine-parseable: search by userId, traceId, error type
+  → traceId links logs across services for one request
+  → Dashboards and alerts built on structured fields</div>`},
+],quiz:[
+{q:"A user reports 'the checkout was slow at 3:05pm.' Which observability tool helps you find EXACTLY where the time was spent across 8 microservices?",opts:["Metrics (Prometheus)","Logs (Elasticsearch)","Distributed Traces (Jaeger/Zipkin)","CPU dashboards"],correct:2,exp:"Distributed traces follow a single request through every service with timing for each step. You'd see: API Gateway 5ms → Auth 10ms → Cart Service 12ms → Payment Service 773ms → done. Immediately pinpoints the bottleneck."},
+]}},
+{id:14,title:"Monitor Server-Side Errors",tag:"Core Components",time:"10 min",content:{intro:"Server-side monitoring catches infrastructure problems before users notice them. The goal is to detect, alert, and diagnose issues faster than users can report them.",sections:[
+{h2:"Key Server Metrics to Monitor",body:`<table class="comp-table"><thead><tr><th>Metric</th><th>Warning Threshold</th><th>What It Signals</th></tr></thead><tbody><tr><td>CPU Utilization</td><td>&gt;70% sustained</td><td>Need to scale, or CPU-intensive bug</td></tr><tr><td>Memory Usage</td><td>&gt;80%</td><td>Memory leak or insufficient capacity</td></tr><tr><td>Error Rate (5xx)</td><td>&gt;0.1%</td><td>Application bugs or downstream service failing</td></tr><tr><td>P99 Latency</td><td>&gt;500ms</td><td>Database slow queries, network issues</td></tr><tr><td>DB Connection Pool</td><td>&gt;80% used</td><td>Connection exhaustion approaching</td></tr><tr><td>Disk Usage</td><td>&gt;75%</td><td>Log rotation or cleanup needed</td></tr></tbody></table>`},
+{h2:"Designing the Monitoring System",body:`<div class="code-block">Pull-based (Prometheus model):
+  Prometheus scrapes /metrics endpoint from each service
+  + Each service controls what it exposes
+  + Easy to add new metrics without reconfiguring collector
+  - Services must expose HTTP endpoint
+
+Push-based (StatsD / Datadog model):
+  Services push metrics to central collector
+  + Works for short-lived processes (lambdas, batch jobs)
+  + Simpler service-side code
+  - Collector becomes bottleneck if many services push simultaneously
+
+Hybrid approach (recommended):
+  Use pull for long-running services
+  Use push for batch jobs and event-driven functions</div>`,callout:{type:"tip",title:"💎 Golden Signals",body:"Google SRE recommends monitoring exactly 4 signals for any service: Latency (how slow?), Traffic (how much?), Errors (what is failing?), Saturation (how full is the system?). If these 4 are healthy, your service is healthy."}},
+],quiz:[
+{q:"You notice P99 latency suddenly jumps from 50ms to 2 seconds but error rate stays at 0%. What is the most likely cause?",opts:["A complete service outage","A slow database query or lock contention — requests succeed but take much longer","A memory leak causing crashes","Network packet loss"],correct:1,exp:"High latency with low error rate typically means requests are succeeding but waiting — often a slow DB query, lock contention, or an external service that is slow but not failing. Distributed traces would pinpoint the exact step."},
+]}},
+{id:15,title:"Monitor Client-Side Errors",tag:"Core Components",time:"9 min",content:{intro:"Server metrics look healthy, but users are still complaining. Why? Because client-side errors — JavaScript crashes, slow page loads, failed network requests in the browser — are invisible to server monitoring.",sections:[
+{h2:"What Client-Side Monitoring Captures",body:`<table class="comp-table"><thead><tr><th>Event Type</th><th>Example</th><th>Impact</th></tr></thead><tbody><tr><td>JavaScript Errors</td><td>TypeError: cannot read property of null</td><td>Feature broken for affected users</td></tr><tr><td>Page Load Time</td><td>Time to First Contentful Paint: 4.2s</td><td>High bounce rates if &gt;3 seconds</td></tr><tr><td>Core Web Vitals</td><td>LCP, FID, CLS scores</td><td>Affects Google search ranking</td></tr><tr><td>Failed API Calls</td><td>POST /checkout returned 503</td><td>Users cannot complete purchases</td></tr><tr><td>User Session Replays</td><td>Heatmaps, click paths, rage clicks</td><td>Reveals UX confusion and frustration</td></tr></tbody></table>`},
+{h2:"Client-Side Monitoring Architecture",body:`<div class="code-block">Browser / Mobile App
+    |
+[Monitoring SDK]  (Sentry, Datadog RUM, Dynatrace)
+    - Captures: JS errors, performance timings, user actions
+    - Buffers locally (handles offline/slow connections)
+    |
+[Batched HTTP upload to Monitoring Service]
+    |
+[Error Aggregation]  (group similar errors, detect new vs. recurring)
+    |
+[Alert: "500 new users hit 'checkout crash' in last 5 minutes"]
+    |
+[Engineer sees: browser, OS, stack trace, session replay → fix!]</div>`,callout:{type:"success",title:"Real Impact",body:"Airbnb found that 60% of their JavaScript errors were happening on a specific old Android browser they weren't testing. Client-side monitoring revealed this in hours. Without it, they would have lost bookings from millions of users indefinitely."}},
+],quiz:[
+{q:"Your server metrics show 99.9% success rate and 50ms P99 latency, but conversion rate dropped 30%. What should you check?",opts:["Scale up your servers","Check client-side monitoring for JavaScript errors or slow rendering","Restart the database","Check DNS records"],correct:1,exp:"Healthy server metrics but poor business metrics (low conversion) is a classic sign of a client-side issue. A JavaScript crash on the checkout page would not show as a server error — the server successfully returned the page, but the browser-side code failed."},
+]}},
+{id:16,title:"Distributed Cache",tag:"Core Components",time:"15 min",content:{intro:"Caching is one of the highest-impact optimizations in system design. A well-designed cache can reduce database load by 90% and cut response times from hundreds of milliseconds to under 1 millisecond.",sections:[
+{h2:"Cache Read Strategies",body:`<table class="comp-table"><thead><tr><th>Strategy</th><th>Flow</th><th>Best For</th></tr></thead><tbody><tr><td>Cache-Aside (Lazy Loading)</td><td>Check cache → miss → read DB → store in cache → return</td><td>General purpose — most common</td></tr><tr><td>Read-Through</td><td>Always read from cache; cache fetches DB on miss transparently</td><td>Simplified application code</td></tr><tr><td>Refresh-Ahead</td><td>Pre-populate cache before TTL expires</td><td>Predictable, frequently-accessed data</td></tr></tbody></table>`},
+{h2:"Cache Write Strategies",body:`<table class="comp-table"><thead><tr><th>Strategy</th><th>Flow</th><th>Consistency</th></tr></thead><tbody><tr><td>Write-Through</td><td>Write to cache AND database simultaneously</td><td>High — cache always matches DB</td></tr><tr><td>Write-Behind (Write-Back)</td><td>Write to cache first; DB updated later asynchronously</td><td>Risk of data loss on crash</td></tr><tr><td>Write-Around</td><td>Write directly to DB, skip cache</td><td>Good for write-heavy, rarely-read data</td></tr></tbody></table>`},
+{h2:"Cache Eviction Policies",body:`<ul><li><strong>LRU (Least Recently Used)</strong> — Evict item not accessed for longest. Most common. O(1) with a doubly-linked hashmap.</li><li><strong>LFU (Least Frequently Used)</strong> — Evict item accessed fewest times. Good for skewed access patterns.</li><li><strong>FIFO</strong> — Evict the oldest item. Simple but ignores access patterns.</li><li><strong>TTL-based</strong> — Items expire after a set time regardless of access. Good for time-sensitive data.</li></ul>`},
+{h2:"Redis vs. Memcached",body:`<table class="comp-table"><thead><tr><th>Feature</th><th>Redis</th><th>Memcached</th></tr></thead><tbody><tr><td>Data Types</td><td>Strings, Lists, Sets, Sorted Sets, Hashes, Streams</td><td>Strings only</td></tr><tr><td>Persistence</td><td>Yes — RDB snapshots + AOF log</td><td>No — memory only</td></tr><tr><td>Replication + Clustering</td><td>Yes — Redis Cluster, Sentinel</td><td>No native support</td></tr><tr><td>Pub/Sub</td><td>Yes — built-in</td><td>No</td></tr><tr><td>Choose Redis for</td><td>Leaderboards, sessions, queues, real-time, rate limiting</td><td>Simple HTML fragment caching only</td></tr></tbody></table>`,callout:{type:"success",title:"When to Cache",body:"Cache when data is read much more than written, data does not need to be perfectly fresh, and DB reads are expensive. Rule of thumb: cache if your read:write ratio exceeds 5:1."}},
+],quiz:[
+{q:"Your e-commerce product page takes 800ms. Profiling shows 700ms is a DB query fetching product details. What is the fastest fix?",opts:["Rewrite the database in a faster language","Add Redis caching for product data with 5-minute TTL","Buy a bigger database server","Compress the HTML response"],correct:1,exp:"Product details rarely change. Caching them in Redis with a 5-minute TTL turns a 700ms DB query into a ~1ms cache read. This is often the single highest-ROI optimization in web systems."},
+]}},
+{id:17,title:"Distributed Messaging Queue",tag:"Core Components",time:"16 min",content:{intro:"Message queues decouple services and enable asynchronous communication. They are the secret weapon for building resilient, scalable systems that survive traffic spikes and service failures.",sections:[
+{h2:"The Core Problem Solved",body:`<div class="code-block">WITHOUT Queue (synchronous, tightly coupled):
+
+User places order → [Order Service]
+    (waits 5+ seconds for all downstream calls)
+    ├── [Email Service]
+    ├── [Inventory Service]
+    └── [Analytics Service]
+    If ANY service is slow/down → user waits or sees error!
+
+WITH Queue (asynchronous, decoupled):
+
+User places order → [Order Service] → "order.placed" event → [Queue]
+← Instant response!                                              |
+                                              ┌──────────────────┤
+                                              ↓          ↓       ↓
+                                         [Email]  [Inventory] [Analytics]
+                                    (each processes when ready, independently)</div>`,callout:{type:"info",title:"☕ Coffee Shop Analogy",body:"A message queue is like a coffee shop order ticket system. You order (produce a message) and the barista makes your drink when ready (consumes the message). You don't stand frozen at the counter waiting — you sit down. The ticket is the queue."}},
+{h2:"Key Concepts",body:`<table class="comp-table"><thead><tr><th>Concept</th><th>Role</th></tr></thead><tbody><tr><td>Producer</td><td>Service that sends messages to the queue</td></tr><tr><td>Consumer</td><td>Service that reads and processes messages</td></tr><tr><td>Broker</td><td>The queue system itself (Kafka, RabbitMQ)</td></tr><tr><td>Topic / Queue</td><td>Named channel for a category of messages</td></tr><tr><td>Acknowledgment (ACK)</td><td>Consumer signals it successfully processed a message</td></tr><tr><td>Dead Letter Queue</td><td>Messages that failed processing after N retries go here for investigation</td></tr></tbody></table>`},
+{h2:"Delivery Guarantees",body:`<table class="comp-table"><thead><tr><th>Guarantee</th><th>Description</th><th>Risk</th></tr></thead><tbody><tr><td>At-Most-Once</td><td>Delivered once, never re-sent on failure</td><td>Message loss on crash</td></tr><tr><td>At-Least-Once</td><td>Delivered once but may be re-sent on failure</td><td>Duplicate processing (use idempotency keys)</td></tr><tr><td>Exactly-Once</td><td>Delivered precisely once, guaranteed</td><td>Complex, slow — often an approximation</td></tr></tbody></table>`,callout:{type:"warn",title:"Idempotency is Key",body:"Most production systems use at-least-once delivery and make consumers idempotent — processing the same message twice produces the same result as processing it once. Example: payment processing checks if payment ID was already processed before charging."}},
+{h2:"Apache Kafka Architecture",body:`<div class="code-block">Kafka Key Concepts:
+  Topic:     Named category ("orders", "user-events")
+  Partition: Topics split into parallel streams (e.g., 32 partitions)
+  Offset:    Position of a message within a partition
+  Consumer Group: Multiple consumers sharing partition reads
+
+Benefits over traditional queues:
+  • Log retention: replay events from any point in time
+  • High throughput: millions of messages/second
+  • Durable: messages persisted to disk, replicated
+  • Decoupled: producers don't know who consumes</div>`},
+],quiz:[
+{q:"A payment service uses at-least-once delivery from a message queue. What MUST you implement to prevent charging customers twice?",opts:["Stronger encryption","Idempotency keys — check if payment ID was already processed","Faster servers","A second message queue"],correct:1,exp:"Idempotency keys prevent duplicate processing. Each payment request has a unique ID. Before processing, check if that ID was already used. If yes, return the cached result without re-charging. This is industry-standard in payment systems."},
+]}},
+{id:18,title:"Pub-Sub System",tag:"Core Components",time:"12 min",content:{intro:"Pub-Sub (Publish-Subscribe) is a messaging pattern where publishers send events to topics and subscribers receive all events on topics they care about — without knowing each other.",sections:[
+{h2:"Pub-Sub vs. Message Queue",body:`<table class="comp-table"><thead><tr><th>Feature</th><th>Message Queue</th><th>Pub-Sub</th></tr></thead><tbody><tr><td>Consumers per message</td><td>One consumer processes each message</td><td>Many consumers each receive the message</td></tr><tr><td>Coupling</td><td>Producer knows about the queue</td><td>Producer knows only the topic</td></tr><tr><td>Use Case</td><td>Task processing (one worker handles the task)</td><td>Event broadcasting (notify many services)</td></tr><tr><td>Message retention</td><td>Deleted after consumption</td><td>Retained for all subscribers</td></tr></tbody></table>`,callout:{type:"info",title:"📰 Newspaper Analogy",body:"Pub-Sub is like a newspaper subscription. The newspaper (publisher) doesn't know who reads it. Subscribers choose which newspapers they want. Multiple subscribers get the same paper. Cancel anytime — the publisher is unaffected."}},
+{h2:"Real-World Example: Instagram Notification",body:`<div class="code-block">User likes a photo → [Like Service]
+                          |
+               publishes "photo.liked" event
+                          |
+               [Pub-Sub Broker: Kafka]
+                    /     |      \\
+         [Notification] [Feed]  [Analytics]
+          Service       Service  Service
+
+Each subscriber processes the event independently.
+Notification Service: sends push notification to photo owner
+Feed Service: updates like counter in user feeds
+Analytics Service: records engagement metrics
+
+Without Pub-Sub: Like Service must call all 3 services directly.
+Add a 4th subscriber? Like Service needs zero changes.</div>`},
+{h2:"Designing a Pub-Sub System",body:`<div class="code-block">Components:
+  Broker:       Kafka / Google Pub/Sub / AWS SNS
+  Topics:       Named channels ("user.signup", "order.placed")
+  Partitions:   Parallel streams within a topic for scale
+  Subscribers:  Register interest in topics
+
+Durability options:
+  • At-least-once: message re-delivered if subscriber crashes
+  • Message retention: keep messages 7 days (replay if subscriber is down)
+  • Consumer groups: multiple instances of same service share the load</div>`},
+],quiz:[
+{q:"You add a new Email Service that needs to react to 'user.signup' events. Pub-Sub already handles this. How many code changes are needed in the existing services?",opts:["Change every service that triggers signups","Zero — just subscribe the new service to the user.signup topic","Add an API call from Auth Service to Email Service","Change the database schema"],correct:1,exp:"This is the key advantage of Pub-Sub. The Auth Service publishes 'user.signup' without knowing who will consume it. The new Email Service just subscribes to that topic. No existing code changes needed — perfect decoupling."},
+]}},
+{id:19,title:"Rate Limiter",tag:"Core Components",time:"13 min",content:{intro:"A rate limiter controls how many requests a user or service can make within a time window. It protects your system from abuse, DDoS attacks, and runaway clients.",sections:[
+{h2:"Why Rate Limiting?",body:`<ul><li><strong>Prevent API abuse</strong> — bots scraping your data or brute-forcing passwords</li><li><strong>DDoS protection</strong> — absorb or deflect volumetric attacks</li><li><strong>Business rules</strong> — free plan: 100 req/day; paid: 10,000 req/day</li><li><strong>Protect downstream</strong> — prevent one noisy tenant from starving others</li><li><strong>Cost control</strong> — LLM APIs that cost per-token need hard limits</li></ul>`},
+{h2:"Algorithms Compared",body:`<table class="comp-table"><thead><tr><th>Algorithm</th><th>How It Works</th><th>Allows Bursting?</th></tr></thead><tbody><tr><td>Token Bucket</td><td>Fill bucket at fixed rate; each request consumes 1 token</td><td>Yes — up to bucket capacity</td></tr><tr><td>Leaky Bucket</td><td>Requests queue up; processed at fixed outflow rate</td><td>No — strict output rate</td></tr><tr><td>Fixed Window Counter</td><td>Count requests per fixed time window (e.g., 60-second windows)</td><td>Yes — 2× at window boundaries</td></tr><tr><td>Sliding Window Log</td><td>Log all request timestamps; count in last N seconds</td><td>No — accurate but memory-heavy</td></tr><tr><td>Sliding Window Counter</td><td>Hybrid of fixed window + sliding; memory-efficient and accurate</td><td>Minimal</td></tr></tbody></table>`,callout:{type:"info",title:"Token Bucket in Detail",body:"Start with 100 tokens. Refill 10 tokens/second (max 100). Each request costs 1 token. A burst of 100 requests succeeds immediately. Then only 10 more per second. Most real systems (GitHub API, Stripe) use Token Bucket for this burst-friendly behavior."}},
+{h2:"Distributed Rate Limiting with Redis",body:`<div class="code-block">Problem: 10 servers handling requests from User X.
+Each server tracks its own count → User X can make
+10× the intended limit across servers!
+
+Solution: Shared Redis counter with atomic INCR:
+
+Server 1: User X request → INCR "rl:user:X:minute:1704067260"
+Server 2: User X request → INCR "rl:user:X:minute:1704067260"
+         → Redis returns count=2 atomically
+         → If count > limit: return 429 Too Many Requests
+
+Key expires automatically after 1 minute (SET EX 60)
+All servers see the same counter — accurate global rate limiting!</div>`},
+],quiz:[
+{q:"The Fixed Window Counter algorithm has a boundary condition vulnerability. What is it?",opts:["It uses too much memory","A user can make 2× the limit by sending requests at the end of one window and start of the next","It is too slow for high-traffic systems","It doesn't support distributed systems"],correct:1,exp:"With 100 req/min limit: send 100 requests at 00:59, then 100 more at 01:01. That's 200 requests in 2 seconds but both windows are within limits. Sliding window algorithms fix this by evaluating requests in a rolling time window."},
+]}},
+{id:20,title:"Blob Store Design",tag:"Core Components",time:"12 min",content:{intro:"A blob store is a system for storing large unstructured files — images, videos, backups, documents. Think Amazon S3, Google Cloud Storage, or Azure Blob Storage. Understanding how to design one is a common system design interview question.",sections:[
+{h2:"Why Not a Regular Database?",body:`<table class="comp-table"><thead><tr><th>Feature</th><th>Regular Database</th><th>Blob Store</th></tr></thead><tbody><tr><td>Optimized For</td><td>Structured records, random access</td><td>Large sequential file reads/writes</td></tr><tr><td>Cost per GB</td><td>$0.10–0.50/GB/month (expensive)</td><td>$0.02–0.03/GB/month (cheap)</td></tr><tr><td>Max object size</td><td>Typically a few MB</td><td>5 TB per object (S3)</td></tr><tr><td>Scale</td><td>Terabytes practical</td><td>Exabytes (Amazon S3 stores trillions of objects)</td></tr></tbody></table>`},
+{h2:"Blob Store Design",body:`<div class="code-block">Upload Flow:
+  1. Client → POST /upload → API returns upload URL + blob ID
+  2. Client → PUT video.mp4 → Storage cluster (direct, bypasses API)
+  3. Large files split into 64 MB chunks (enables parallel upload)
+  4. Each chunk replicated across 3 storage nodes (durability)
+  5. Metadata (blob ID, chunks, URLs, size) stored in metadata DB
+
+Download Flow:
+  1. Client → GET /blob/{id} → API returns pre-signed URL
+  2. Client → GET {presigned_url} → CDN edge server
+  3. CDN cache HIT: serves directly (fast!)
+  4. CDN cache MISS: fetches from storage cluster, caches
+
+Pre-signed URL: time-limited URL with embedded auth token
+  → Lets clients download directly without exposing credentials
+  → Expires after 15 minutes → unauthorized access blocked</div>`,callout:{type:"success",title:"Deduplication",body:"If two users upload the same file, a blob store hashes each chunk (SHA-256) and stores only one copy. Instagram reportedly saved 50%+ storage costs through content-aware deduplication."}},
+{h2:"Key Design Considerations",body:`<ul><li><strong>Chunking</strong> — Large files split for parallel upload, partial failure recovery, and efficient CDN caching</li><li><strong>Geo-replication</strong> — Store copies in multiple regions for global access and disaster recovery</li><li><strong>Storage tiers</strong> — Hot (frequent access, expensive), Warm (infrequent), Cold (archive, very cheap)</li><li><strong>Lifecycle policies</strong> — Auto-move objects to cheaper tiers after N days</li></ul>`},
+],quiz:[
+{q:"A user uploads a 10 GB video. During upload, the connection drops at 7 GB. What design feature allows resuming without re-uploading the first 7 GB?",opts:["HTTP retry headers","Chunked uploads — only the failed chunks need to be re-sent","Pre-signed URLs","CDN caching"],correct:1,exp:"Chunked uploads split the file into small pieces (e.g., 64 MB). Each chunk is uploaded and acknowledged separately. On connection drop, only the in-flight chunk needs to be re-sent — not the entire file. This is how YouTube, Dropbox, and S3 multipart uploads work."},
+]}},
+{id:21,title:"Distributed Search",tag:"Core Components",time:"14 min",content:{intro:"How does Google search billions of pages in 0.3 seconds? How does Twitter let you search 500 million tweets instantly? The answer is distributed search infrastructure built on inverted indexes.",sections:[
+{h2:"The Inverted Index",body:`<div class="code-block">Regular index: document → words it contains
+Inverted index: word → all documents containing it
+
+Documents:
+  Doc 1: "the quick brown fox"
+  Doc 2: "the fox jumped high"
+  Doc 3: "quick brown rabbit"
+
+Inverted Index:
+  "quick"  → [Doc 1, Doc 3]
+  "fox"    → [Doc 1, Doc 2]
+  "brown"  → [Doc 1, Doc 3]
+
+Query: "quick fox"
+  → "quick" matches [Doc 1, Doc 3]
+  → "fox"   matches [Doc 1, Doc 2]
+  → Intersection = [Doc 1] ← returned as result
+
+This lookup is O(log n) instead of scanning every document!</div>`,callout:{type:"info",title:"Why It's Called 'Inverted'",body:"A regular (forward) index maps document ID to its words. An inverted index maps words back to document IDs — the mapping is inverted. It is specifically designed for fast full-text search."}},
+{h2:"Distributed Search Architecture",body:`<div class="code-block">New Content Indexed:
+[Documents] → [Tokenizer] → [Index Builder] → [Shard Index]
+
+Index Sharding:
+  Shard 1: terms A-F        Shard 2: terms G-M
+  Shard 3: terms N-S        Shard 4: terms T-Z
+
+Query Flow:
+  User: "quick fox"
+  [Query Broker] fans out to all shards in parallel
+     Shard 1: no results for "quick" or "fox" in A-F terms
+     Shard 2+: returns matching doc IDs with relevance scores
+  [Result Merger] combines + re-ranks by relevance score
+  [User sees ranked results in &lt;100ms]</div>`},
+{h2:"Scaling Search",body:`<table class="comp-table"><thead><tr><th>Technique</th><th>How It Helps</th></tr></thead><tbody><tr><td>Horizontal sharding</td><td>Split the index — each shard handles a fraction of terms</td></tr><tr><td>Replication</td><td>Multiple replicas per shard for fault tolerance and parallel reads</td></tr><tr><td>Query result caching</td><td>Cache top-1000 queries in Redis (80% of searches are repeated)</td></tr><tr><td>Approximate indexing</td><td>Accept slight staleness — index updates lag by minutes, not milliseconds</td></tr></tbody></table>`},
+],quiz:[
+{q:"A search query for 'machine learning' runs against 8 index shards. How does the system handle this efficiently?",opts:["Query runs sequentially against each shard (shard 1, then 2, etc.)","Query fans out to all shards in parallel; a merger combines results","Only the shard containing 'm' terms is queried","The query is cached from a previous user"],correct:1,exp:"Parallel fan-out is essential for low-latency search. All shards are queried simultaneously. Each shard returns its top results with scores. A central merger re-ranks and deduplicates results from all shards. Total time = slowest single shard, not sum of all shards."},
+]}},
+{id:22,title:"Distributed Logging",tag:"Core Components",time:"11 min",content:{intro:"In a distributed system with 100 services, when something goes wrong, logs are scattered everywhere. Distributed logging brings them together so you can reconstruct exactly what happened.",sections:[
+{h2:"The ELK Stack",body:`<table class="comp-table"><thead><tr><th>Component</th><th>Role</th><th>Tool</th></tr></thead><tbody><tr><td>Log Collection</td><td>Collect logs from every service and server</td><td>Fluentd, Logstash, Filebeat</td></tr><tr><td>Log Transport</td><td>Stream high-volume logs to storage</td><td>Kafka, Kinesis</td></tr><tr><td>Log Storage + Index</td><td>Store and index for fast full-text search</td><td>Elasticsearch</td></tr><tr><td>Visualization</td><td>Search, filter, dashboard, and alert on logs</td><td>Kibana, Grafana</td></tr></tbody></table>`,callout:{type:"success",title:"Distributed Tracing Integration",body:"Modern systems link logs across services with a shared Trace ID. Each log entry includes the same traceId for a given user request. In Kibana, search 'traceId:abc-123' to see all logs from every service for that single request, sorted by time."}},
+{h2:"Log Architecture",body:`<div class="code-block">[Service A] → log file
+[Service B] → log file   →  [Fluentd Agent]  →  [Kafka]
+[Service C] → log file                               |
+                                            [Elasticsearch]
+                                                     |
+                                              [Kibana UI]
+
+Engineer investigates incident:
+  Search: userId=123 AND level=ERROR AND timestamp > "15:00"
+  → All errors for that user across all services in chronological order
+  → Pinpoint exactly which service and line caused the issue</div>`},
+{h2:"Log Levels and Best Practices",body:`<table class="comp-table"><thead><tr><th>Level</th><th>When to Use</th></tr></thead><tbody><tr><td>ERROR</td><td>Something failed and requires immediate attention</td></tr><tr><td>WARN</td><td>Something unexpected but recoverable happened</td></tr><tr><td>INFO</td><td>Normal operational milestones (request completed, job started)</td></tr><tr><td>DEBUG</td><td>Detailed diagnostic info — disabled in production by default</td></tr></tbody></table>`},
+],quiz:[
+{q:"You need to trace a slow checkout request through 12 microservices. What makes this possible in a distributed logging system?",opts:["All services write to the same log file","A Trace ID passed through every service call, included in every log entry","Timestamps are synchronized across services","Using the same logging library in every service"],correct:1,exp:"A Trace ID (UUID generated at the API gateway) is passed through every service call via HTTP headers. Each service includes it in every log entry. Searching for that Trace ID in Elasticsearch instantly shows all logs from all 12 services for that single request, in order."},
+]}},
+{id:23,title:"Distributed Task Scheduler",tag:"Core Components",time:"13 min",content:{intro:"A task scheduler manages background jobs that run at specific times or intervals: sending weekly newsletters, generating nightly reports, retrying failed payments, or cleaning up expired data.",sections:[
+{h2:"What to Schedule",body:`<p>Common background tasks in production systems:</p><ul><li>Send weekly email newsletters every Monday 9am</li><li>Generate financial reports at midnight</li><li>Retry failed payment every hour for 24 hours then give up</li><li>Clean up expired user sessions every 30 minutes</li><li>Refresh caches before peak traffic hours</li><li>Send push notifications for scheduled reminders</li></ul>`},
+{h2:"Task Scheduler Architecture",body:`<div class="code-block">[Service submits task]
+    → POST /schedule { fn: "sendEmail", at: "2024-01-15T09:00Z", userId: 123 }
+    → Task saved to [Task DB] with status: PENDING
+
+[Scheduler Process] runs every minute:
+    → SELECT tasks WHERE scheduled_at <= NOW() AND status = PENDING
+    → Publishes each task to [Task Queue] (Kafka/Redis)
+    → Updates status to: QUEUED
+
+[Worker Pool] consumes from queue:
+    → Execute task function
+    → On success: UPDATE task SET status = DONE
+    → On failure: UPDATE task SET status = FAILED, retries = retries + 1
+    → After 3 retries: status = DEAD_LETTER → alert engineers</div>`,callout:{type:"warn",title:"Preventing Duplicate Execution",body:"In distributed systems, multiple scheduler instances might pick the same task simultaneously. Use optimistic locking: UPDATE tasks SET status='QUEUED' WHERE id=? AND status='PENDING' — only one process succeeds, others see 0 rows updated."}},
+{h2:"Idempotency in Task Execution",body:`<p>Tasks must be designed to be <strong>idempotent</strong> — running them twice produces the same result as running once. This is critical because:</p><ul><li>Network failures may cause retries</li><li>Worker crashes may cause re-queuing of the same task</li><li>Exactly-once execution is nearly impossible to guarantee</li></ul><div class="code-block">Non-idempotent (BAD):
+  "INSERT INTO emails (user_id, sent_at) VALUES (123, NOW())"
+  Run twice → 2 emails sent, 2 database rows!
+
+Idempotent (GOOD):
+  "INSERT INTO emails (user_id, date) VALUES (123, '2024-01-15')
+   ON CONFLICT (user_id, date) DO NOTHING"
+  Run twice → 1 email sent, 1 database row!</div>`},
+],quiz:[
+{q:"Two scheduler instances both pick the same task at the same moment. How do you prevent double execution?",opts:["Use two separate task queues","Optimistic locking — only the first UPDATE from PENDING to QUEUED succeeds","Add a random delay before execution","Use a faster scheduler"],correct:1,exp:"Optimistic locking uses a conditional UPDATE: 'UPDATE tasks SET status=QUEUED WHERE id=X AND status=PENDING'. Only one instance will get 1 row updated (success). The second gets 0 rows updated and knows it lost the race. No locks held — just atomic SQL."},
+]}},
+{id:24,title:"Sharded Counters",tag:"Core Components",time:"10 min",content:{intro:"A tweet's like count sounds simple — just increment a number. But at Twitter scale, a viral tweet can receive 100,000 likes per second. A single database row can only handle ~1,000 writes/second. Sharded counters solve this.",sections:[
+{h2:"The Problem with Simple Counters",body:`<div class="code-block">Simple counter:
+  UPDATE tweets SET likes = likes + 1 WHERE tweet_id = 123
+
+Problem: this requires a row-level lock on tweet 123.
+At 100,000 likes/second:
+  → 100,000 threads queue up for the same lock
+  → Database melts, timeouts cascade, users see errors</div>`},
+{h2:"Sharded Counter Solution",body:`<div class="code-block">Instead of 1 counter, use N shards:
+  Update: choose random shard → INCR counter:tweet:123:shard:{0..9}
+  Read:   SUM counter:tweet:123:shard:0 through shard:9
+
+Example (N=10 shards, 100K likes/sec):
+  Each shard handles only 10K writes/sec → easily manageable!
+
+  shard:0 = 9,843     shard:5 = 10,201
+  shard:1 = 10,034    shard:6 = 9,977
+  ...
+  Total = SUM of all 10 shards = 1,000,000 likes
+
+Read latency: reading 10 shards adds ~1ms vs single read
+  → Acceptable trade-off for massive write throughput</div>`,callout:{type:"success",title:"YouTube Uses Approximate Counts",body:"YouTube shows '1.2M views' not '1,234,567'. They round to significant figures for display. This removes the need for perfect real-time aggregation — periodic background jobs sum the shards every few minutes, updating a cached total."}},
+{h2:"When to Use Sharded Counters",body:`<p>Use sharded counters when:</p><ul><li>Write rate exceeds ~1,000 increments/second per counter</li><li>Content can go viral (unpredictable traffic spikes)</li><li>Exact real-time counts are not required (approximate is fine)</li></ul><p>Real examples: YouTube view counts, Twitter likes, Reddit upvotes, Facebook reactions, Amazon product review counts.</p>`},
+],quiz:[
+{q:"A tweet goes viral with 500,000 likes/second. You have 100 shards. What is the write rate per shard?",opts:["500,000/sec per shard","5,000/sec per shard","1,000/sec per shard","50,000/sec per shard"],correct:1,exp:"500,000 total writes / 100 shards = 5,000 writes/second per shard. A Redis instance handles 100K+ writes/second, so each shard has plenty of headroom. This is the power of sharding — distribute load so no single component is overwhelmed."},
+]}},
+{id:25,title:"RESHADED — Putting It All Together",tag:"Interview Prep",time:"14 min",content:{intro:"You now know all the building blocks. RESHADED gives you the structured approach to combine them into a complete system design in a 45-minute interview.",sections:[
+{h2:"Step-by-Step RESHADED",body:`<div class="code-block">Example prompt: "Design a URL Shortener like bit.ly"
+
+R — Requirements (5 min)
+  Functional:     shorten URLs, redirect, custom aliases, analytics
+  Non-functional: 100M shortened/day, read:write=100:1, 99.99% uptime
+  Out of scope:   user authentication, billing
+
+E — Estimation (5 min)
+  Write RPS = 100M / 86,400 ≈ 1,160/sec
+  Read RPS  = 1,160 × 100  = 116,000/sec
+  Storage   = 100M × 500B  = 50 GB/day → 182 TB in 10 years
+
+S — Storage Schema (5 min)
+  Table: urls
+    id:          BIGINT (Snowflake ID)
+    short_code:  VARCHAR(8)  UNIQUE INDEX
+    long_url:    TEXT
+    user_id:     BIGINT
+    created_at:  TIMESTAMP
+    expire_at:   TIMESTAMP (nullable)
+    click_count: BIGINT
+
+H — High-Level Design (10 min)
+  [Client] → [DNS] → [CDN? No — redirects must be dynamic]
+  → [Load Balancer] → [App Servers (stateless)]
+  → [Redis Cache] → [MySQL DB] → [Analytics Queue]
+
+A — API Design (5 min)
+  POST /shorten  { url, custom_alias?, expire_days? }
+  → 201: { shortUrl: "bit.ly/abc123" }
+  
+  GET /{shortCode}
+  → 302: Location: https://original-long-url.com
+
+D — Detailed Design (10 min)
+  Short code generation: Snowflake ID → Base62 encode → 7 chars
+  Cache: GET /{code} → check Redis first (TTL: 24h)
+         Cache miss: DB query → store in Redis → redirect
+  
+E — Evaluation (5 min)
+  Bottleneck: Redis handles 116K RPS easily (single node ~100K)
+  DB: 1,160 writes/sec → primary DB is fine
+  Cache hit rate target: >99% for popular links
+  
+D — Distinctive Features (5 min)
+  Link expiration: background job deletes expired, sets cache TTL
+  Analytics: async event to Kafka → ClickHouse for counts</div>`},
+{h2:"Common Interview Checkpoints",body:`<ul><li><strong>After requirements</strong> — "Do these requirements match what you had in mind?"</li><li><strong>After estimation</strong> — "Based on this scale, I plan to use X and Y. Does that direction make sense?"</li><li><strong>After high-level design</strong> — "Should I dive deeper into the database design or the caching layer?"</li><li><strong>After detailed design</strong> — "I think the main bottleneck is X. Would you like me to address that?"</li></ul>`,callout:{type:"success",title:"What Interviewers Remember",body:"They remember how you handled uncertainty, whether you discussed trade-offs, and whether you were collaborative. A perfectly designed system presented without discussion scores lower than a good design that invites conversation."}},
+],quiz:[
+{q:"In RESHADED, you estimate that reads are 100× more than writes (116,000 RPS reads). What architectural decision does this directly drive?",opts:["Add more write replicas","Implement heavy caching with Redis to handle read load","Use a faster programming language","Add more CPU cores to the database"],correct:1,exp:"High read:write ratio directly means: add a cache layer. 116K reads/sec would overwhelm a single database, but Redis handles this easily with sub-millisecond response times. This is exactly the pattern: estimate → identify read-heavy → add cache."},
+]}},
+{id:26,title:"Design YouTube",tag:"Real Systems",time:"25 min",content:{intro:"YouTube serves 2 billion users with 500 hours of video uploaded every minute and 1 billion hours watched daily. Let us design a system that handles this scale.",sections:[
+{h2:"Scale Estimation",body:`<div class="code-block"><span class="code-lbl">SCALE</span>Uploads: 500 hours/min → 30,000 hours/hour
+Storage per hour HD video: ~2 GB × 5 quality levels = 10 GB/hr
+Daily storage needed: 30,000 × 24 × 10 GB = 7.2 PB/day!
+
+Views: 1B hours watched daily
+Peak concurrent streams: ~700,000
+Bandwidth at 1080p (5 Mbps each): 700K × 5 = 3.5 Tbps peak</div>`},
+{h2:"Video Upload and Transcoding Pipeline",body:`<div class="code-block">[User uploads raw video]
+       ↓
+[Blob Store — temporary raw storage]
+       ↓
+[Message published to Transcoding Queue]
+       ↓
+[Transcoding Workers] (many in parallel)
+   → 360p  (mobile, low bandwidth)
+   → 720p  (standard)
+   → 1080p (HD)
+   → 4K    (premium)
+   → Extract thumbnail frames
+       ↓
+[Each quality split into ~10-second chunks]
+       ↓
+[Chunks stored in Blob Store (S3-like)]
+       ↓
+[CDN ingestion — chunks pushed to edge servers globally]
+       ↓
+[Metadata DB: video_id, chunk URLs, duration, qualities, status]</div>`,callout:{type:"info",title:"Why Chunking?",body:"Splitting video into 10-second chunks enables: (1) parallel downloading of multiple chunks simultaneously, (2) seeking to any point without downloading the full video, (3) adaptive quality switching between chunks based on current network speed."}},
+{h2:"Adaptive Bitrate Streaming (ABR)",body:`<p>YouTube uses HLS (HTTP Live Streaming) or MPEG-DASH. The player automatically adapts quality based on your connection:</p><ul><li>Excellent connection → 4K chunks served</li><li>Connection drops → switches to 720p → no buffering</li><li>Connection improves → gradually steps back up</li></ul><p>The player maintains a 30-second buffer. You only see buffering when seeking or when buffer empties faster than download speed.</p>`},
+{h2:"Search and Recommendations",body:`<p>YouTube's search uses inverted indexes on video titles, descriptions, transcripts, and tags. The recommendation system uses:</p><ul><li>Watch history and session data (what you watched, for how long)</li><li>Collaborative filtering (users like you also watched X)</li><li>Content-based signals (similar topics, channels)</li><li>Engagement signals (likes, shares, comments, click-through rate)</li></ul>`},
+],quiz:[
+{q:"Why does YouTube transcode each video into multiple resolutions?",opts:["To save storage space","To support different devices and connection speeds via adaptive bitrate streaming","Google has too many servers to use","To add watermarks"],correct:1,exp:"A 4K video would buffer constantly on a mobile connection. Transcoding into multiple resolutions lets players automatically select the highest quality their connection can handle — this is Adaptive Bitrate Streaming (ABR)."},
+{q:"A user with a bad connection starts watching a 1080p YouTube video. What happens automatically?",opts:["The video pauses and asks the user to lower quality","The player switches to a lower quality chunk mid-stream with no interruption","The video buffers indefinitely","YouTube sends a lower-quality re-encoded version of the whole video"],correct:1,exp:"ABR (Adaptive Bitrate) protocols like HLS work at the chunk level. The player monitors download speed and switches to the appropriate quality tier for each new 10-second chunk. The transition is seamless — no pause, no user action needed."},
+]}},
+{id:27,title:"Design Quora",tag:"Real Systems",time:"16 min",content:{intro:"Quora is a Q&A platform with 300 million monthly users. The key challenges are serving a personalized home feed, ranking answers by quality, and handling the fan-out problem for popular questions.",sections:[
+{h2:"Core Data Schema",body:`<table class="comp-table"><thead><tr><th>Table</th><th>Key Columns</th></tr></thead><tbody><tr><td>users</td><td>user_id, name, email, bio, follower_count, credential_count</td></tr><tr><td>questions</td><td>question_id, user_id, text, topic_id, view_count, answer_count, created_at</td></tr><tr><td>answers</td><td>answer_id, question_id, user_id, text, upvotes, downvotes, created_at</td></tr><tr><td>topics</td><td>topic_id, name, follower_count</td></tr><tr><td>follows</td><td>follower_id, followee_type (user/topic), followee_id</td></tr></tbody></table>`},
+{h2:"Feed Generation: Fan-out Strategy",body:`<table class="comp-table"><thead><tr><th>Approach</th><th>How It Works</th><th>Best For</th></tr></thead><tbody><tr><td>Fan-out on Write (Push)</td><td>When content posted, push to followers' pre-computed feeds</td><td>Normal users (few followers)</td></tr><tr><td>Fan-out on Read (Pull)</td><td>When user opens feed, query all followed topics/users</td><td>Power users (millions of followers)</td></tr><tr><td>Hybrid</td><td>Push for &lt;10K followers; pull for celebrities; merge at read time</td><td>Production systems like Quora</td></tr></tbody></table>`,callout:{type:"info",title:"Answer Ranking",body:"Quora's answer ranking considers: upvote/downvote ratio, author's credentials on the topic (a doctor answering medical questions), answer completeness (length, citations, images), recency, and personalization based on topics you follow."}},
+{h2:"High-Level Architecture",body:`<div class="code-block">[User] → [API Gateway] → [Load Balancer]
+                               |
+          ┌────────────────────┼────────────────────┐
+          ↓                    ↓                    ↓
+   [Question Service]  [Answer Service]      [Feed Service]
+          ↓                    ↓                    ↓
+      [MySQL]              [MySQL]           [Redis Cache]
+                                               (pre-built feeds)
+                                                    ↓
+                                         [Feed Generation Worker]
+                                         (fan-out on write/read)</div>`},
+],quiz:[
+{q:"A famous doctor with 2M Quora followers posts an answer. With pure fan-out-on-write, what problem occurs?",opts:["The answer is lost","2M Redis feed lists must be updated immediately — massive write spike","The answer is not indexed for search","The doctor's account is rate-limited"],correct:1,exp:"Fan-out-on-write for 2M followers means 2M Redis LPUSH operations instantly. Even at 100K writes/second, that takes 20 seconds — unacceptable. Quora uses a hybrid: push for normal users, pull-merge for celebrities/popular topics."},
+]}},
+{id:28,title:"Design Google Maps",tag:"Real Systems",time:"20 min",content:{intro:"Google Maps is one of the most complex systems in existence — handling map rendering at every zoom level, routing across the entire globe, and real-time traffic from hundreds of millions of phones.",sections:[
+{h2:"Map Tiles: Serving the World",body:`<div class="code-block">The world map is divided into tiles at different zoom levels:
+  Zoom 0:  1 tile  = entire world (1 image)
+  Zoom 1:  4 tiles = 4 hemispheres
+  Zoom 10: 1,048,576 tiles = city blocks
+  Zoom 20: ~1 trillion tiles = individual buildings
+
+Total tiles: ~4.4 trillion!
+
+Strategy: Pre-render all tiles → store in blob store → serve via CDN
+  - Tiles are static images → perfect CDN cache candidates
+  - Hit rate is very high (same cities queried constantly)
+  - Changed map data → regenerate only affected tiles
+  
+Tile key: /tiles/{zoom}/{x}/{y}.png
+  → CDN serves from nearest edge server
+  → Cache hit rate: ~99% for popular zoom levels</div>`},
+{h2:"Routing: Finding the Best Path",body:`<div class="code-block">Road network = weighted directed graph
+  Nodes: intersections (~1 billion in world road network)
+  Edges: road segments
+  Weights: travel time (changes with traffic!)
+
+Algorithms:
+  Dijkstra's:        O(E log V) — too slow for global routing
+  A* with heuristic: faster but still impractical at global scale
+  
+Hierarchical Routing (what Google uses):
+  1. Pre-compute fast routes on highways (contracted graph)
+  2. At query time: find fastest route from A to highway
+  3. Take pre-computed highway route
+  4. Find fastest route from highway to B
+  
+  Result: ~100ms routing across entire country</div>`,callout:{type:"info",title:"Contraction Hierarchies",body:"Google pre-computes a 'contracted' version of the road network where important roads are weighted as shortcuts. During routing, unimportant roads are pruned early. This reduces a billion-node graph to an effectively much smaller problem."}},
+{h2:"Real-Time Traffic: Crowdsourced Data",body:`<p>Google Maps traffic data comes from:</p><ul><li><strong>Anonymous phone data</strong> — phones with Google Maps open send anonymized location at intervals</li><li><strong>Historical patterns</strong> — "This road is always slow at 8am on weekdays"</li><li><strong>Machine learning</strong> — Combines historical + real-time for ETA prediction</li><li><strong>User reports</strong> — Traffic incidents, accidents reported by users</li></ul>`},
+{h2:"ETA Computation",body:`<p>ETA = sum of travel times on each road segment in the chosen route. But road weights change constantly with traffic.</p><ul><li>Base weight: historical average travel time for that road segment at this time of day</li><li>Real-time adjustment: +30% if live data shows congestion</li><li>ML model: trained on millions of historical trips to predict delay</li></ul>`},
+],quiz:[
+{q:"Why are map tiles served from a CDN instead of computed on-demand?",opts:["CDNs are more secure","Tiles are pre-rendered static images that rarely change — perfect for caching near users","CDNs can render maps faster","To prevent map copying"],correct:1,exp:"Map tiles are static PNG/WebP images (the road network doesn't change daily). Pre-rendering and serving from CDN achieves ~99% cache hit rate. Computing tiles on-demand for every user request at every zoom level would require enormous server capacity."},
+]}},
+{id:29,title:"Design Yelp (Proximity Service)",tag:"Real Systems",time:"15 min",content:{intro:"Yelp's core feature is finding businesses near you — restaurants, shops, services. This requires specialized geospatial search algorithms that cannot be solved with a simple SQL query.",sections:[
+{h2:"The Proximity Search Problem",body:`<div class="code-block">Naive SQL approach (DO NOT USE):
+  SELECT * FROM businesses
+  WHERE sqrt(pow(lat - 37.78, 2) + pow(lng - (-122.41), 2)) < 0.01
+
+Problem: Full table scan on 50 million businesses = seconds per query!
+
+We need a spatial index that makes proximity search fast.</div>`},
+{h2:"Geohash: The Efficient Solution",body:`<div class="code-block">Geohash divides the world into a grid of cells.
+Each cell gets a short string code. Nearby locations share common prefixes.
+
+User at (37.785, -122.408) in San Francisco:
+  geohash = "9q8yy7"
+
+Nearby cell at (37.786, -122.409):
+  geohash = "9q8yy6"  (shares "9q8yy" prefix!)
+
+Finding nearby businesses:
+  1. Compute user's geohash: "9q8yyz"
+  2. Find all businesses with prefix "9q8yy" (same grid cell + neighbors)
+  3. 8 neighboring cells cover the full search area
+  
+  SQL: SELECT * FROM businesses WHERE geohash LIKE '9q8yy%'
+  → Uses a regular string index → fast! O(log n)</div>`,callout:{type:"info",title:"Geohash Precision",body:"Geohash length determines precision. 4 chars = ~40km cell. 6 chars = ~1.2km cell. 8 chars = ~40m cell. For a restaurant finder, 6-character geohash covers the right radius. Adjust precision based on your search radius."}},
+{h2:"Full Architecture",body:`<div class="code-block">[User with GPS] → [Location Service]
+                       ↓
+               [Geohash Index]  (in-memory or Redis)
+                       ↓
+               [Nearby Business IDs]
+                       ↓
+               [Business Service] → [Redis Cache] → [MySQL]
+                       ↓
+               [Review Service] → [Elasticsearch for text search]
+                       ↓
+               [Response: ranked nearby businesses]</div>`},
+],quiz:[
+{q:"A user searches for 'pizza near me' in San Francisco. The geohash for their location is '9q8yy'. What SQL query finds nearby pizzerias efficiently?",opts:["SELECT * FROM businesses WHERE type='pizza' ORDER BY distance ASC","SELECT * FROM businesses WHERE geohash LIKE '9q8yy%' AND type='pizza'","SELECT * FROM businesses WHERE lat BETWEEN 37.7 AND 37.8","SELECT * FROM businesses JOIN locations ON …"],correct:1,exp:"LIKE '9q8yy%' uses the string index on geohash to efficiently find all businesses in the same geohash cell and its neighbors. Then filter by type='pizza'. The string prefix match is O(log n) using a B-tree index — no full table scan needed."},
+]}},
+{id:30,title:"Design Uber",tag:"Real Systems",time:"22 min",content:{intro:"Uber matches 15 million daily trips with real-time GPS tracking of 5 million drivers. The core engineering challenge: processing 1 million location updates per second.",sections:[
+{h2:"Scale Estimation",body:`<div class="code-block">15M trips/day = 174 trips/second average
+5M active drivers updating GPS every 5 seconds
+= 5,000,000 ÷ 5 = 1,000,000 location writes/second!
+
+This is the core challenge. A traditional DB cannot handle this.
+Solution: Redis + geohashing + WebSockets.</div>`},
+{h2:"Driver Location Service",body:`<div class="code-block">[Driver App] sends GPS every 5 sec via WebSocket
+
+Location Service:
+  1. Receives (driverId, lat, lng, timestamp)
+  2. Converts to geohash: (37.78, -122.41) → "9q8yy"
+  3. HSET driver:{id} geohash "9q8yy" lat 37.78 lng -122.41 available 1
+  4. EXPIRE driver:{id} 35  (removes if no update for 35 sec)
+
+Find nearby available drivers:
+  1. Rider location → geohash "9q8yz"
+  2. SCAN Redis for driver:* WHERE geohash starts with "9q8y"
+  3. Filter: available=1, vehicle_type matches
+  4. Calculate precise distance for top candidates
+  5. Rank by estimated pickup time (uses traffic data)</div>`,callout:{type:"success",title:"Why Redis + Geohash?",body:"Redis handles 100K+ writes/second per instance; clustered Redis achieves 1M+/sec. Geohashing turns 2D proximity search into prefix string matching — something Redis hashes handle in O(1). Together they are the perfect solution for real-time location at this scale."}},
+{h2:"Matching Algorithm",body:`<ol><li>Rider requests ride with (lat, lng, vehicle_type)</li><li>System expands search radius: 500m → 1km → 2km until drivers found</li><li>Rank by estimated pickup time (not just distance — traffic matters)</li><li>Send ride offer to top driver via WebSocket (30-second timeout)</li><li>On decline or timeout → offer to next driver in ranked list</li><li>On acceptance → notify rider, start trip, begin GPS tracking of route</li></ol>`},
+{h2:"Payment and Fraud Detection",body:`<p>After trip completion, the payment flow:</p><ul><li>Fare calculated server-side (distance × rate × surge multiplier)</li><li>Idempotency key prevents double charging on network retries</li><li>Fraud detection ML model analyzes: GPS trace patterns, driver-rider collusion signals, abnormal routes, payment anomalies</li></ul>`},
+],quiz:[
+{q:"Why does Uber use WebSockets instead of HTTP polling for driver location updates?",opts:["WebSockets are more secure","WebSockets maintain persistent bidirectional connections — zero overhead for continuous GPS streaming","WebSockets use less GPS battery","HTTP doesn't support GPS coordinates"],correct:1,exp:"HTTP polling (GET /location every 5 seconds) wastes bandwidth on connection setup overhead for each request. WebSocket keeps one persistent connection — the driver's app just sends GPS coordinates over the open socket. 10× less overhead, zero latency for updates."},
+]}},
+{id:31,title:"Design Twitter",tag:"Real Systems",time:"22 min",content:{intro:"Twitter's home timeline — showing tweets from all accounts you follow in real-time — is one of the hardest engineering problems at scale. Understanding the fan-out problem and its solution is essential for system design interviews.",sections:[
+{h2:"The Fan-Out Problem",body:`<div class="code-block">You follow 500 people. Each tweets ~2×/day = 1,000 tweets/day for you.
+
+NAIVE APPROACH (Fan-out on Read):
+  SELECT tweets FROM users 
+  WHERE user_id IN (your 500 followed IDs)
+  ORDER BY created_at DESC LIMIT 50;
+  
+  At 150M users opening the app daily:
+  150M complex JOIN queries = database melts!
+
+PUSH APPROACH (Fan-out on Write):
+  When @alice tweets:
+    Push tweet_id to Redis list for each follower
+    timeline:{followerId} = [tweet_id_1, tweet_id_2, ...]
+  
+  Opening Twitter = just read your Redis list (O(1)!)
+  → Twitter targets &lt;100ms home timeline load</div>`,callout:{type:"warn",title:"⚠️ Celebrity Problem",body:"Fan-out on write fails for celebrities. When a user with 150M followers tweets, you'd need 150M Redis list writes immediately — a massive spike that would overwhelm the system for minutes. Solution: celebrities use fan-out on READ instead."}},
+{h2:"The Hybrid Solution",body:`<table class="comp-table"><thead><tr><th>User Type</th><th>Strategy</th><th>Why</th></tr></thead><tbody><tr><td>Normal users (&lt;10K followers)</td><td>Fan-out on Write (push to Redis timeline lists)</td><td>Fast writes, instant O(1) reads</td></tr><tr><td>Celebrity (&gt;10K followers)</td><td>Fan-out on Read (pull tweets at read time)</td><td>Avoids millions of writes per tweet</td></tr><tr><td>Your timeline</td><td>Pre-built list + merge celebrity tweets at read time</td><td>Best of both worlds</td></tr></tbody></table>`},
+{h2:"Tweet Storage",body:`<div class="code-block">Tweets table (MySQL — relational for structured data):
+  tweet_id  BIGINT PRIMARY KEY  (Snowflake ID — sortable by time!)
+  user_id   BIGINT INDEX
+  content   VARCHAR(280)
+  media_url VARCHAR(512)        (points to blob storage)
+  created_at TIMESTAMP           (redundant with tweet_id but explicit)
+  
+  Sharded by tweet_id % num_shards
+  Read replicas for read-heavy operations</div>`},
+],quiz:[
+{q:"A celebrity with 50M followers tweets. With pure fan-out-on-write, what is the problem?",opts:["Nothing — 50M writes complete instantly","50M Redis writes must happen near-simultaneously — minutes of delay for the tweet to appear in all timelines","The tweet is automatically delayed","The tweet is only sent to active followers"],correct:1,exp:"50M Redis list writes at 100K writes/second takes 500 seconds = over 8 minutes! A tweet from a major celebrity must appear in timelines near-instantly. This is why Twitter uses a hybrid approach — celebrities are pulled at read time, not pushed at write time."},
+]}},
+{id:32,title:"Design Newsfeed System",tag:"Real Systems",time:"16 min",content:{intro:"A newsfeed shows a personalized, ranked stream of content from your connections. This is the core feature of Facebook, LinkedIn, and Instagram. The engineering challenge is generating a relevant, fresh feed for billions of users efficiently.",sections:[
+{h2:"Newsfeed Requirements",body:`<ul><li>Show posts from friends, pages, and groups you follow</li><li>Ranked by relevance (not just chronological)</li><li>Updated in near-real-time (seconds, not minutes)</li><li>Paginated efficiently (infinite scroll)</li><li>Handle read:write ratio of ~100:1</li></ul>`},
+{h2:"Feed Generation Pipeline",body:`<div class="code-block">[User creates post]
+       ↓
+[Fan-out Service]
+  → Checks follower count
+  → &lt;10K followers: push to each follower's feed (Redis list)
+  → &gt;10K followers: mark post in "celebrity posts" table
+       ↓
+[Redis Feed Lists]
+  feed:{userId} = [postId_1, postId_2, ..., postId_500]
+  (Keep only latest 500 posts per user)
+       ↓
+[Feed Ranking Service] (runs at read time)
+  Takes raw feed → applies ML ranking model:
+  → Recency score (newer posts ranked higher initially)
+  → Engagement prediction (will this user like this post?)
+  → Relationship strength (close friend vs. distant acquaintance)
+  → Content type preference (user watches more videos)
+       ↓
+[Paginated response to client]</div>`,callout:{type:"info",title:"Feed Ranking Is a Product Decision",body:"Chronological feed (Twitter's old default) is simple but noisy. Ranked feed (Facebook, Instagram) shows what you care about most but can feel manipulative. Many platforms now let users toggle between ranked and chronological — build support for both."}},
+{h2:"Handling Offline Users",body:`<p>If a user hasn't opened the app in 7 days:</p><ul><li>Their Redis feed list may be stale or evicted (Redis uses LRU)</li><li>On next open: trigger an on-demand feed generation (fan-out on read)</li><li>This is more expensive but happens infrequently</li></ul>`},
+],quiz:[
+{q:"A user opens their feed and the Redis list is empty (evicted due to inactivity). What happens?",opts:["The user sees an empty feed","Fall back to fan-out-on-read: query the database for recent posts from followed users","The system crashes","Show a cached feed from 7 days ago"],correct:1,exp:"Robust feed systems detect an empty or stale cache and fall back to an on-demand database query (fan-out on read). This is slower but correct. The result is then stored back in Redis for subsequent requests. This graceful degradation prevents showing empty feeds."},
+]}},
+{id:33,title:"Design Instagram",tag:"Real Systems",time:"18 min",content:{intro:"Instagram handles photo/video uploads, follow graphs, stories, and a personalized feed for 2 billion users. The photo storage and CDN architecture is a masterclass in blob store design.",sections:[
+{h2:"Photo Upload Flow",body:`<div class="code-block">[User selects photo on phone]
+       ↓
+[App compresses to multiple sizes locally] (mobile processing)
+       ↓
+[Upload to Blob Store (Amazon S3)]
+  → Upload original: s3://instagram/photos/user:123/photo:abc.jpg
+       ↓
+[Message published: "photo.uploaded" → Kafka]
+       ↓
+[Media Processing Workers]
+  → Generate resized versions:
+     Thumbnail:     150×150 px  → ~15 KB
+     Feed preview:  612×612 px  → ~80 KB
+     Full view:     1080×1080 px → ~300 KB
+     Original:      varies       → preserve for downloads
+       ↓
+[All versions stored in S3]
+[CDN distribution: push popular users' content to edge servers]</div>`,callout:{type:"success",title:"Progressive Loading",body:"Instagram uses a blurred 2KB placeholder image while the full photo loads. This 2KB blur is embedded directly in the feed API response (base64 encoded), so it appears instantly. The full image then loads over the network and replaces the blur."}},
+{h2:"Stories: Disappear After 24 Hours",body:`<div class="code-block">Implementation:
+  1. Story uploaded → stored in blob store with metadata in Redis
+     SETEX story:{storyId} 86400 {userId, mediaUrl, timestamp}
+     (TTL = 24 hours → Redis auto-deletes after expiry)
+  
+  2. Stories feed = sorted set per user
+     ZADD stories:{viewerId} {timestamp} {storyId}
+     
+  3. Background cleanup job:
+     Runs hourly → deletes expired story media from S3
+     (Redis TTL handles metadata, job handles actual media files)
+     
+  4. "Seen" tracking:
+     SADD story:{storyId}:views {viewerId}
+     (Set stores unique viewers — efficient for view count)</div>`},
+{h2:"Follow Graph and Feed",body:`<p>Instagram's follow graph is stored in a combination of:</p><ul><li><strong>MySQL</strong> — persistent follow relationships (user_id, followee_id, created_at)</li><li><strong>Redis</strong> — follower counts and pre-computed friend lists for fast fan-out</li><li><strong>Neo4j (or similar)</strong> — used for "People you may know" graph recommendations</li></ul>`},
+],quiz:[
+{q:"Instagram generates 4 different sized versions of every uploaded photo. Why not just store the original and resize on-demand?",opts:["On-demand resizing is impossible","Pre-generating saves compute at read time — images are read 1000× more than written","Storage is free, so why not","To apply different filters to each size"],correct:1,exp:"Photos are read 1000× more than uploaded. On-demand resizing at 1000 reads per write would waste enormous compute. Pre-generating all sizes at upload time (write-once) means every read just fetches the pre-sized image from S3/CDN — instant and cheap."},
+]}},
+{id:34,title:"Design TinyURL",tag:"Real Systems",time:"14 min",content:{intro:"A URL shortener converts long URLs into short codes and redirects users. It is a classic system design question because it covers ID generation, caching, database design, and redirect HTTP mechanics.",sections:[
+{h2:"Scale Estimation",body:`<div class="code-block">100M URLs shortened per day
+Read:Write = 100:1
+
+Write RPS = 100M / 86,400 ≈ 1,160/sec
+Read RPS  = 1,160 × 100 = 116,000/sec
+
+Storage per URL: ~500 bytes (short code + long URL + metadata)
+Daily storage:   100M × 500B = 50 GB/day
+10-year storage: 50 GB × 365 × 10 ≈ 182 TB</div>`},
+{h2:"Generating Short Codes",body:`<div class="code-block">Approach: Base62 encode a Snowflake ID
+
+Base62 charset: a-z, A-Z, 0-9 = 62 characters
+7 characters:   62^7 = 3.5 trillion unique codes ✓✓
+
+Process:
+  1. Generate 64-bit Snowflake ID: e.g., 8,234,567,890
+  2. Encode to base62:  8,234,567,890 → "9aB3xZ2"
+  3. Store: short_code="9aB3xZ2" → long_url="https://very-long..."
+  
+Why not MD5 hash?
+  MD5("https://example.com") → take first 7 chars
+  Problem: hash collisions! Two URLs → same short code
+  Requires collision detection + retry logic → complex</div>`,callout:{type:"info",title:"Base62 vs. Base64",body:"Base64 uses +, /, = characters which cause issues in URLs. Base62 (letters + digits only) is URL-safe by design. 7 base62 characters give 3.5 trillion combinations — enough for centuries of URL shortening."}},
+{h2:"Redirect: 301 vs. 302",body:`<table class="comp-table"><thead><tr><th>Code</th><th>Meaning</th><th>Browser Caches?</th><th>Analytics?</th></tr></thead><tbody><tr><td>301 Permanent Redirect</td><td>This URL will always redirect here</td><td>Yes — future requests go direct</td><td>Lost — browser skips TinyURL</td></tr><tr><td>302 Temporary Redirect</td><td>This URL redirects for now</td><td>No — always calls TinyURL</td><td>Tracked — every click counted</td></tr></tbody></table>`},
+{h2:"System Design",body:`<div class="code-block">POST /shorten { url, custom_alias? }
+  → Generate short_code (Snowflake → Base62)
+  → Store in MySQL + cache in Redis
+  → Return: { shortUrl: "bit.ly/9aB3xZ2" }
+
+GET /9aB3xZ2
+  → Check Redis cache (TTL: 24 hours)
+  → Cache HIT: 302 redirect (sub-millisecond!)
+  → Cache MISS: MySQL query → cache → 302 redirect
+  → Async: publish click event to analytics queue</div>`},
+],quiz:[
+{q:"A user visits bit.ly/abc. The system returns a 302 redirect. What happens on the user's SECOND visit to the same short URL?",opts:["Same 302 from TinyURL (browser always asks)","301 is returned on second visit","Browser caches the 302 — goes directly to destination (skips TinyURL)","An error because 302 is not cacheable"],correct:0,exp:"302 redirects are NOT cached by browsers by default (unlike 301). Every visit to a 302 short URL calls the TinyURL servers again. This enables click analytics but means more server load. 301 would cache and skip TinyURL after first visit."},
+]}},
+{id:35,title:"Design Web Crawler",tag:"Real Systems",time:"16 min",content:{intro:"A web crawler systematically browses the internet to discover and index web pages. Google's crawler visits billions of pages to build its search index. Designing one tests your understanding of queues, deduplication, and politeness.",sections:[
+{h2:"Core Crawling Algorithm",body:`<div class="code-block">1. Start with seed URLs: [google.com, wikipedia.org, ...]
+2. Fetch HTML for each URL
+3. Parse HTML: extract links → <a href="...">
+4. Deduplicate: is this URL already crawled or in queue?
+5. If new: add to URL Frontier (priority queue)
+6. Store fetched content in blob store
+7. Pass to indexer for search index
+8. Goto step 2 with next URL from Frontier
+
+URL Frontier: priority queue considering:
+  - Domain authority (important sites crawled more often)
+  - Freshness (news sites crawled hourly, blogs monthly)
+  - Politeness (max 1 request/second per domain)</div>`},
+{h2:"Architecture",body:`<div class="code-block">[URL Frontier] (priority queue in Redis/Kafka)
+      ↓
+[Fetcher] — checks robots.txt — downloads HTML — respects delays
+      ↓
+[Parser] — extracts links, text, metadata
+      ↓
+[Deduplicator] — Bloom filter (URL seen before?)
+      ↓               ↓
+[Link Extractor]  [Content Store] — blob store for raw HTML
+      ↓
+[New URLs] → back to URL Frontier</div>`,callout:{type:"info",title:"Bloom Filter for Deduplication",body:"With billions of URLs, you cannot store every seen URL in memory. A Bloom filter uses ~1 GB of memory to track billions of URLs with zero false negatives (never reports 'not seen' for a seen URL) and a tiny false positive rate (~0.1%). Perfect for deduplication."}},
+{h2:"robots.txt: The Crawling Contract",body:`<div class="code-block">Every site can have /robots.txt defining crawl rules:
+
+User-agent: Googlebot
+Allow: /
+Disallow: /private/
+Crawl-delay: 1   (wait 1 second between requests)
+
+User-agent: *    (applies to all crawlers)
+Disallow: /admin/
+Disallow: /login
+
+Well-behaved crawlers ALWAYS check robots.txt first.
+Ignoring robots.txt can result in IP bans and legal issues.</div>`},
+{h2:"Crawl Traps to Avoid",body:`<ul><li><strong>Spider traps</strong> — Infinite URLs via parameters: ?page=1, ?page=2, ?page=∞ — detect by setting max depth</li><li><strong>Duplicate content</strong> — Same page at different URLs (http vs https, www vs non-www) — normalize URLs first</li><li><strong>Dynamic URLs</strong> — Session IDs in URLs create infinite unique paths — use URL patterns to deduplicate</li></ul>`},
+],quiz:[
+{q:"A crawler visits ?page=1, ?page=2, ?page=3 and discovers the site generates infinite page numbers. What is this called and how do you handle it?",opts:["A DDoS attack — report to authorities","A spider trap — detect by limiting max crawl depth per domain","A robots.txt violation — ignore all pages","A CDN misconfiguration"],correct:1,exp:"Spider traps generate infinite unique URLs, causing a crawler to loop forever. Defense strategies: maximum crawl depth per domain, URL fingerprinting (detect parameterized variations), maximum pages per domain per crawl cycle, and URL normalization to collapse duplicates."},
+]}},
+{id:36,title:"Design WhatsApp",tag:"Real Systems",time:"20 min",content:{intro:"WhatsApp delivers 100 billion messages per day to 2 billion users with end-to-end encryption. The key challenges are real-time delivery, offline storage, and true end-to-end encryption that even WhatsApp cannot break.",sections:[
+{h2:"Real-Time Messaging with WebSockets",body:`<div class="code-block">HTTP Polling (inefficient):
+  Alice: "Any messages?" every 5 seconds
+  Server: "No", "No", "No", "No", "Yes! Here's Bob's message"
+  Wasted: 4 out of 5 requests return nothing
+  Latency: up to 5 seconds for message delivery
+
+WebSocket (efficient):
+  Alice connects once: persistent bidirectional connection
+  Bob sends "Hey!" → Server instantly pushes to Alice (<100ms)
+  Alice sends "Hi!" → Server instantly pushes to Bob
+  
+  1 connection maintained vs. constant reconnections
+  Near-zero latency for message delivery</div>`,callout:{type:"info",title:"Connection Management at Scale",body:"WhatsApp with 2B users cannot keep 2B WebSocket connections open simultaneously (most users are on mobile and frequently disconnect). The system must handle graceful reconnection — when Alice opens the app, she connects, downloads queued messages, and maintains connection while app is in foreground."}},
+{h2:"End-to-End Encryption (Signal Protocol)",body:`<div class="code-block">Key Exchange (one-time setup):
+  Alice generates: public key (shared openly) + private key (secret)
+  Bob generates:   public key (shared openly) + private key (secret)
+
+Sending a message from Alice to Bob:
+  1. Alice encrypts message with Bob's public key
+  2. Encrypted blob sent to WhatsApp server
+  3. Server stores/routes encrypted blob (cannot read it!)
+  4. Bob downloads encrypted blob
+  5. Bob decrypts with his private key
+
+WhatsApp's servers see only: who ↔ who, when, size
+WhatsApp CANNOT hand over message contents — they don't have them.</div>`},
+{h2:"Message Delivery Status",body:`<table class="comp-table"><thead><tr><th>Status</th><th>Indicator</th><th>What Triggered It</th></tr></thead><tbody><tr><td>Sent</td><td>✓ (single grey)</td><td>Server received and stored the message</td></tr><tr><td>Delivered</td><td>✓✓ (double grey)</td><td>Bob's device downloaded the message</td></tr><tr><td>Read</td><td>✓✓ (double blue)</td><td>Bob opened the conversation</td></tr></tbody></table>`},
+{h2:"Offline Message Storage",body:`<div class="code-block">Bob is offline when Alice sends a message:
+  1. Server stores encrypted message (in DynamoDB with TTL=30 days)
+  2. Sends push notification via APNs (iOS) or FCM (Android)
+     → Bob's phone wakes up (even if app is closed)
+  
+Bob comes online:
+  3. Bob's app connects via WebSocket
+  4. Server delivers all queued messages
+  5. Bob's app sends delivery receipt for each
+  6. Server updates status to "Delivered" ✓✓
+  7. Server deletes its copy of the message (respects E2E privacy)</div>`},
+],quiz:[
+{q:"Bob is offline when Alice sends him a message. What happens to the message?",opts:["It is permanently lost","Alice must resend when Bob comes online","Server stores the encrypted message and delivers when Bob reconnects","It is broadcast to all of Bob's contacts"],correct:2,exp:"WhatsApp stores encrypted messages on servers for up to 30 days while the recipient is offline. When Bob reconnects, all queued messages are delivered, Bob's device sends delivery receipts, and the server deletes its stored copies."},
+]}},
+{id:37,title:"Design Typeahead Suggestion",tag:"Real Systems",time:"15 min",content:{intro:"Typeahead (autocomplete) shows search suggestions as you type. When you type 'sys' in Google, it instantly suggests 'system design', 'system requirements', etc. Designing this requires the right data structure and efficient caching.",sections:[
+{h2:"The Trie Data Structure",body:`<div class="code-block">A Trie (prefix tree) is perfect for prefix matching.
+Each node = one character. Path from root = a word.
+
+Storing: "system", "systems", "systematic", "search"
+
+        [root]
+          |
+         [s]
+        /   \\
+      [y]   [e]
+       |       \\
+      [s]      [a]
+       |         \\
+      [t]        [r]
+       |           \\
+      [e]          [c]
+     / \\             \\
+   [m] [m]           [h] ← "search"
+    |    |
+   end  [s] ← "systems"
+  "system"
+  
+Query "sys": traverse s→y→s → return all words in subtree</div>`,callout:{type:"info",title:"Trie vs. Database",body:"A SQL LIKE 'sys%' query uses a B-tree index but still reads many rows. A Trie navigates directly to the 'sys' node in O(length of query) then fetches all completions. For real-time autocomplete needing sub-10ms responses, Trie wins."}},
+{h2:"Ranking Suggestions",body:`<ul><li><strong>Query frequency</strong> — "system design" searched 10M times/day ranks above "systematic botany"</li><li><strong>Recency weighting</strong> — trending queries from last 24 hours boosted</li><li><strong>Personalization</strong> — your own recent searches appear first</li><li><strong>Geography</strong> — regional queries (sports teams, local news) boosted for local users</li></ul>`},
+{h2:"System Architecture",body:`<div class="code-block">[Search Logs] (billions/day)
+       ↓
+[Log Aggregator] (MapReduce job, runs hourly)
+  → Count queries by frequency for past 7 days
+       ↓
+[Trie Builder Service]
+  → Builds Trie with top-N completions per node
+  → Each node stores: top 10 completions + frequency scores
+       ↓
+[Trie Storage] (serialized to blob store)
+       ↓
+[Typeahead Service] (loads Trie into RAM)
+  → GET /suggest?prefix=sys → traverse Trie → return top 5
+  → &lt;5ms response time from in-memory Trie
+
+Caching: top 1000 prefixes cached in Redis separately
+  (80% of typeahead requests are for top-1000 prefixes)</div>`},
+],quiz:[
+{q:"A user types 'sys'. How does the Trie find completions efficiently?",opts:["Scan all nodes in the Trie","Traverse s→y→s in O(3) steps, then collect all words in the subtree","Send a SQL query with LIKE 'sys%'","Return a cached response (always)"],correct:1,exp:"Trie traversal is O(length of prefix) to reach the node. From that node, collect all words in the subtree (BFS/DFS). This is O(prefix length + number of completions) — much faster than scanning all words alphabetically or using SQL LIKE queries at scale."},
+]}},
+{id:38,title:"Design Google Docs",tag:"Real Systems",time:"18 min",content:{intro:"Google Docs allows multiple users to edit the same document simultaneously, with all changes reflected in real-time across all clients. The core challenge is handling concurrent edits without conflicts.",sections:[
+{h2:"The Concurrent Editing Problem",body:`<div class="code-block">Document: "Hello World"
+
+User A (at position 6): delete "World"
+User B (at position 6): insert "Beautiful "
+
+If applied in sequence (A then B):
+  After A: "Hello "
+  After B: "Hello Beautiful "  ← correct!
+
+If applied in sequence (B then A):
+  After B: "Hello Beautiful World"
+  After A: delete at position 6 → "Hello "  ← WRONG! Deletes "Beautiful"
+
+Problem: The same operation means different things depending
+on what other operations happened concurrently.</div>`,callout:{type:"warn",title:"Why This Is Hard",body:"In a distributed system, there is no global clock. Users A and B both see 'Hello World' at the same instant and make changes. Neither knows about the other's change until after they've committed it. Any correct solution must handle this uncertainty."}},
+{h2:"Operational Transformation (OT)",body:`<div class="code-block">OT transforms operations to account for concurrent operations:
+
+  Op A: delete(position=6, length=5) — delete "World"
+  Op B: insert(position=6, text="Beautiful ")
+
+  Server receives A first, then B.
+  Before applying B, transform it against A:
+    B' = transform(B, A)
+    Since A deleted 5 chars at pos 6, B's insertion
+    position adjusts: B' = insert(position=6, text="Beautiful ")
+    (Position unchanged here — after deletion, 6 is correct)
+
+  Result: "Hello Beautiful "  ← same for all users ✓
+
+Used by: Google Docs, SharePoint, Apache Wave</div>`},
+{h2:"CRDT: The Modern Alternative",body:`<p>Conflict-Free Replicated Data Types (CRDTs) are mathematical data structures that merge changes automatically without conflicts, regardless of order.</p><ul><li>Each character gets a globally unique ID (not just a position)</li><li>Characters are always identified by their ID, not their position</li><li>Insertions and deletions use IDs — no position shift problems</li><li>Used by: Figma, Notion, Linear, Atom Teletype</li></ul>`},
+{h2:"Real-Time Architecture",body:`<div class="code-block">[User A edits]
+    ↓ WebSocket
+[Collaboration Server]
+    ↓ transform/apply operation
+[Operation Log DB] ← all operations stored in order
+    ↓ broadcast
+[User B] ← sees update in &lt;100ms
+
+Periodic snapshotting:
+  Every 100 operations → save full document state
+  Recovery: load latest snapshot + replay operations since snapshot
+  (Avoids replaying thousands of operations on document open)</div>`},
+],quiz:[
+{q:"User A deletes 'World' at position 6. User B inserts 'Beautiful' at position 6. Both are concurrent. What technique ensures all users converge to the same document state?",opts:["Last-write-wins (most recent timestamp)","Operational Transformation (transform B against A before applying)","Locking (only one user can edit at a time)","Full document replacement on each keystroke"],correct:1,exp:"Operational Transformation transforms concurrent operations so they apply correctly regardless of arrival order. The server transforms each operation against all concurrent operations it has not yet seen. All clients eventually apply the same transformed sequence and converge to identical documents."},
+]}},
+{id:39,title:"Design Deployment System",tag:"Real Systems",time:"13 min",content:{intro:"A code deployment system automates getting code from a developer's laptop to production servers safely and reliably. Modern CI/CD pipelines are the backbone of fast-moving engineering teams.",sections:[
+{h2:"CI/CD Pipeline",body:`<div class="code-block">Developer pushes code to GitHub
+        ↓
+[CI: Continuous Integration]
+  ├── Run unit tests (must pass)
+  ├── Run integration tests
+  ├── Static analysis (linting, security scan)
+  └── Build Docker container image
+        ↓
+[Artifact Registry] (Docker Hub, AWS ECR)
+  → Immutable image tagged with git commit hash
+        ↓
+[CD: Continuous Deployment]
+  ├── Deploy to Staging environment
+  ├── Run smoke tests and E2E tests
+  └── If all pass → proceed to production
+        ↓
+[Gradual Production Rollout]</div>`,callout:{type:"success",title:"Immutable Artifacts",body:"Every build produces an immutable Docker image tagged with the exact git commit hash (e.g., myapp:abc1234). You can deploy or rollback to ANY commit instantly by referencing its tag. This is fundamental to safe deployments."}},
+{h2:"Deployment Strategies",body:`<table class="comp-table"><thead><tr><th>Strategy</th><th>How It Works</th><th>Rollback Speed</th><th>Risk</th></tr></thead><tbody><tr><td>All-at-Once</td><td>Deploy to all servers simultaneously</td><td>Slow (re-deploy old version)</td><td>Very high — all users affected</td></tr><tr><td>Rolling</td><td>Deploy to one server at a time</td><td>Medium</td><td>Medium — partial exposure</td></tr><tr><td>Blue-Green</td><td>Deploy to idle env; switch traffic at once; old env is instant rollback</td><td>Instant (switch back)</td><td>Low</td></tr><tr><td>Canary</td><td>Deploy to 1%, monitor, then 10%, 50%, 100%</td><td>Instant (remove canary)</td><td>Minimal — &lt;1% users initially</td></tr></tbody></table>`},
+{h2:"Feature Flags",body:`<p>Feature flags let you deploy code without activating it. You separate deploy from release:</p><ul><li>Deploy new checkout flow code to production (disabled by flag)</li><li>Enable for 1% of users → monitor metrics</li><li>Enable for 10% → A/B test against old flow</li><li>Enable 100% → feature fully launched</li><li>If issues: disable flag instantly without re-deploying</li></ul>`},
+],quiz:[
+{q:"You deploy a new version and immediately see error rate spike. What deployment strategy enables instant rollback with zero additional deployment time?",opts:["Rolling deployment — roll forward one server at a time","Blue-Green deployment — just shift traffic back to the old environment","Canary deployment — remove the 1% canary","All-at-once — redeploy the old version"],correct:1,exp:"Blue-Green maintains two identical environments. The 'old' environment is kept running after deploying to 'new'. On error, you shift traffic back to old in seconds — no redeployment needed. The old environment becomes the fallback. This is the fastest possible rollback."},
+]}},
+{id:40,title:"Design a Payment System",tag:"Real Systems",time:"17 min",content:{intro:"Payment systems handle real money — errors mean financial loss, regulatory violations, and loss of customer trust. The non-negotiable requirements are idempotency, ACID guarantees, and security compliance.",sections:[
+{h2:"Payment Flow Architecture",body:`<div class="code-block">[User clicks Pay $99]
+       ↓
+[Payment Service]
+  1. Validate amount, currency, user authentication
+  2. Check idempotency key (prevent duplicate charge!)
+  3. Create payment record: { status: PENDING, amount: 99, currency: USD }
+       ↓
+[Payment Gateway] (Stripe, Adyen, Braintree)
+  → Tokenize card (never store raw card numbers — PCI DSS!)
+  → Route to Card Network (Visa/Mastercard)
+       ↓
+[Issuing Bank] (customer's bank)
+  → Is card valid? Sufficient funds?
+  → Returns: APPROVED or DECLINED
+       ↓
+[Payment Service]
+  → UPDATE payment SET status = SUCCESS / FAILED
+  → Publish "payment.completed" event → Kafka
+       ↓
+[Order Service, Email Service, etc.] consume event</div>`},
+{h2:"Idempotency: The Most Critical Property",body:`<div class="code-block">Scenario: Network timeout after charge but before response.
+  Without idempotency: retry → double charge → customer complaint!
+
+With idempotency keys:
+  Request:
+    POST /charge
+    Idempotency-Key: "order-789-attempt-1"  ← unique per request
+    { amount: 99, currency: USD, card_token: "tok_abc" }
+
+  First attempt:
+    Key "order-789-attempt-1" not seen → charge → store result
+    Response: { status: success, charge_id: "ch_123" }
+
+  Retry (same key):
+    Key "order-789-attempt-1" already exists → return stored result
+    Response: { status: success, charge_id: "ch_123" }  (no new charge!)
+
+Customer is NEVER charged twice.</div>`,callout:{type:"warn",title:"Stripe Uses This",body:"Stripe's API requires an Idempotency-Key header for all POST requests. They store results for 24 hours. Any retry with the same key returns the original result without re-processing. This is now considered industry-standard for payment APIs."}},
+{h2:"PCI DSS Compliance",body:`<ul><li><strong>Never store raw card numbers</strong> — use payment gateway tokenization</li><li><strong>Encrypt all cardholder data</strong> at rest and in transit</li><li><strong>Audit logging</strong> — every access to payment data logged and monitored</li><li><strong>Network segmentation</strong> — payment servers isolated from rest of infrastructure</li><li><strong>Annual audits</strong> — third-party security assessments required</li></ul>`},
+{h2:"Reconciliation",body:`<p>Every night, your payment records are compared against the bank/gateway records. Discrepancies are investigated and resolved. This is how financial systems ensure no money is lost or incorrectly processed.</p>`},
+],quiz:[
+{q:"A mobile app user taps Pay, the charge succeeds, but the response never reaches the app due to a network error. The app retries. What prevents double charging?",opts:["The bank rejects duplicate amounts","Idempotency key — server detects same key and returns original result without re-charging","The payment gateway automatically prevents this","The user's session expires"],correct:1,exp:"The idempotency key (a unique UUID generated before the first attempt) is sent with every retry. The server checks if that key was already processed. If yes, it returns the stored result without re-executing the charge. This is the definitive solution to the double-charge problem."},
+]}},
+{id:41,title:"Design ChatGPT System",tag:"AI Systems",time:"18 min",content:{intro:"Designing an LLM-powered conversational system like ChatGPT introduces unique challenges — GPU infrastructure, streaming responses, context window management, and extreme computational cost per request.",sections:[
+{h2:"What Makes LLM Systems Different",body:`<table class="comp-table"><thead><tr><th>Traditional API</th><th>LLM API</th></tr></thead><tbody><tr><td>Responds in &lt;100ms</td><td>Generates for 2–30+ seconds</td></tr><tr><td>Runs on CPU servers ($0.001/server/hour)</td><td>Requires GPU clusters (A100: $3/hour each)</td></tr><tr><td>Stateless — each request independent</td><td>Stateful — full conversation history sent each request</td></tr><tr><td>Scales linearly with request count</td><td>GPU allocation and batching is complex</td></tr><tr><td>$0.000001/request</td><td>$0.001–0.10/request (1000–100,000× more expensive)</td></tr></tbody></table>`},
+{h2:"Streaming with Server-Sent Events",body:`<div class="code-block">Without streaming:
+  User: "Write a 500-word essay on distributed systems"
+  [User watches blank screen for 30 seconds]
+  [Full 500-word essay appears at once]
+
+With streaming (what ChatGPT uses):
+  User: "Write a 500-word essay on distributed systems"
+  [Text appears word by word as the model generates it]
+  → Users can read while generation continues
+  → Can interrupt if direction is wrong
+  → Perceived latency drops from 30s to &lt;1s
+
+SSE Implementation:
+  HTTP response stays open with Content-Type: text/event-stream
+  Server sends:  data: {"token": "Distributed "}\n\n
+  Server sends:  data: {"token": "systems "}\n\n
+  ...
+  Server sends:  data: [DONE]\n\n</div>`,callout:{type:"success",title:"Streaming Improves Perceived Performance",body:"Streaming does not make generation faster — it makes waiting feel faster. The time-to-first-token drops from 30s to under 1s. This single UX improvement dramatically increases user satisfaction and task completion rates."}},
+{h2:"Context Window Management",body:`<p>LLMs have a maximum context window (GPT-4: 128K tokens, ~96K words). Long conversations require management:</p><table class="comp-table"><thead><tr><th>Strategy</th><th>How It Works</th><th>Trade-off</th></tr></thead><tbody><tr><td>Sliding Window</td><td>Keep only the last N messages</td><td>Loses early context</td></tr><tr><td>Summarization</td><td>Periodically summarize old messages</td><td>Summary may lose details</td></tr><tr><td>RAG (Retrieval)</td><td>Vector search retrieves relevant past messages</td><td>Most accurate but complex</td></tr></tbody></table>`},
+{h2:"GPU Batching and KV Cache",body:`<p>To maximize expensive GPU utilization:</p><ul><li><strong>Request batching</strong> — Group multiple users' requests onto the same GPU pass (higher throughput)</li><li><strong>KV Cache</strong> — Cache the model's internal computation for the prompt; only compute new tokens incrementally (dramatic speedup for long conversations)</li><li><strong>Speculative decoding</strong> — Small draft model generates tokens quickly; large model verifies in parallel (faster generation)</li></ul>`},
+],quiz:[
+{q:"Why does ChatGPT stream responses word by word instead of waiting for the full answer?",opts:["The model generates one word at a time and cannot batch","Streaming makes waiting feel faster — perceived latency drops from 30s to under 1s","To save server bandwidth","It prevents users from copying the response"],correct:1,exp:"LLMs generate tokens sequentially (each depends on previous). Streaming sends each token to the browser as generated. Total generation time is identical, but users see text appearing immediately instead of waiting 30 seconds for the full response — dramatically better UX."},
+]}},
+{id:42,title:"Data Infrastructure for AI/ML",tag:"AI Systems",time:"16 min",content:{intro:"AI and machine learning require massive amounts of clean, organized data. The data infrastructure that collects, stores, processes, and serves this data is as important as the models themselves.",sections:[
+{h2:"The Modern Data Stack",body:`<div class="code-block">Data Sources:
+  Applications, User Behavior, Databases, IoT Sensors, 3rd-party APIs
+       ↓
+[Data Ingestion Layer]
+  Batch:     Fivetran, Airbyte (scheduled syncs)
+  Streaming: Kafka, Kinesis (real-time events)
+       ↓
+[Data Lake] — Raw storage (Amazon S3, Google GCS)
+  • All data, all formats (JSON, CSV, Parquet, images, video)
+  • Cheap storage, schema-on-read
+  • Source of truth for everything
+       ↓
+[Data Processing]
+  Batch:     Apache Spark, Databricks (large transformations)
+  Streaming: Apache Flink (real-time aggregations)
+       ↓
+[Data Warehouse] — Cleaned, structured (Snowflake, BigQuery)
+  • Optimized for analytical queries
+  • Schema-on-write, columnar storage
+  • BI tools connect here
+       ↓
+   ┌──────────────────┐
+[Analytics/BI]    [ML Training → Feature Store → Model Registry]
+                              ↓
+                    [ML Serving: REST API or batch inference]`,callout:{type:"info",title:"Data Lake vs. Data Warehouse",body:"Data Lake: raw, any format, cheap, for data scientists. Data Warehouse: cleaned, structured, fast queries, for business analysts. Most companies need both — lake for flexibility, warehouse for performance."}},
+{h2:"Feature Store",body:`<p>A feature store is a central repository of ML input features shared across models:</p><ul><li><strong>Training-serving consistency</strong> — Models trained and served on identical features, no skew</li><li><strong>Reusability</strong> — Feature "user_avg_purchase_last_30_days" computed once, used by 20 models</li><li><strong>Online serving</strong> — Real-time feature retrieval (&lt;10ms) for live predictions</li><li><strong>Offline serving</strong> — Historical feature retrieval for model training</li></ul>`,callout:{type:"warn",title:"Training-Serving Skew",body:"Training-serving skew occurs when features computed during training differ from features at serving time. Example: training used Python pandas to compute average; serving used a different formula. This silently degrades model accuracy. A feature store with shared computation logic prevents this."}},
+{h2:"ML Model Lifecycle",body:`<table class="comp-table"><thead><tr><th>Stage</th><th>Description</th><th>Tools</th></tr></thead><tbody><tr><td>Data Preparation</td><td>Clean, transform, split into train/test</td><td>Spark, dbt, Great Expectations</td></tr><tr><td>Feature Engineering</td><td>Create ML-ready features from raw data</td><td>Feast (feature store), Tecton</td></tr><tr><td>Model Training</td><td>Train model on GPU/CPU cluster</td><td>PyTorch, TensorFlow, SageMaker</td></tr><tr><td>Model Registry</td><td>Version and track trained models</td><td>MLflow, Weights & Biases</td></tr><tr><td>Model Serving</td><td>Deploy model behind REST API</td><td>Triton, TorchServe, BentoML</td></tr><tr><td>Monitoring</td><td>Detect model drift and data drift</td><td>Evidently AI, Arize</td></tr></tbody></table>`},
+],quiz:[
+{q:"A model trained last month now gives poor predictions. The data it was trained on had 'user_country' as a feature, but the production system now sends a different country code format. What is this problem called?",opts:["Model overfitting","Training-serving skew","Data lake corruption","Feature store failure"],correct:1,exp:"Training-serving skew is when the feature computation differs between training and production. The model learned patterns from one country code format and now receives a different format — its predictions degrade silently. A shared feature store with versioned computation logic prevents this."},
+]}},
+{id:43,title:"LLM-Powered Customer Support Bot",tag:"AI Systems",time:"14 min",content:{intro:"A customer support bot powered by an LLM can handle thousands of simultaneous conversations, resolve common issues instantly, and escalate complex cases to humans. The key engineering challenge is giving the LLM access to your company's specific knowledge.",sections:[
+{h2:"RAG: Retrieval-Augmented Generation",body:`<div class="code-block">Problem: LLMs don't know your specific company data
+  (product catalog, order history, support policies, FAQs)
+
+Solution: RAG (Retrieval-Augmented Generation)
+
+1. Offline preparation:
+   Company docs, FAQs, policies → chunked → embedded (vector representation)
+   → stored in Vector DB (Pinecone, Weaviate, Chroma)
+
+2. At query time:
+   User: "How do I return my order #12345?"
+   
+   a) Convert query to vector embedding
+   b) Vector similarity search in Vector DB
+      → finds top-3 most relevant document chunks:
+        "Return policy: items returnable within 30 days..."
+        "Order lookup API returns..."
+   
+   c) Build prompt:
+      "You are a support agent for TechShop. Context: {relevant docs}
+       Customer asked: {user question}. Answer helpfully."
+   
+   d) LLM generates accurate, company-specific answer</div>`,callout:{type:"success",title:"Why RAG Works",body:"Without RAG, an LLM answers from general training knowledge and makes up specifics. With RAG, the LLM has your actual policies, product details, and order data in context — answers are grounded in real information, not hallucinations."}},
+{h2:"Architecture",body:`<div class="code-block">[User message]
+       ↓
+[Intent Classifier] — classify: order_status, refund, technical, billing
+       ↓
+[Entity Extractor] — extract: order_id=12345, product="laptop"
+       ↓
+[Tool Use Layer]
+  → If order_status: query Order DB → inject result into context
+  → If refund: query Refund Policy KB via RAG
+  → If technical: query Product Manual KB via RAG
+       ↓
+[LLM with injected context]
+       ↓
+[Response + Confidence Score]
+  → High confidence: return to user
+  → Low confidence or flagged topic: escalate to human agent</div>`},
+{h2:"Escalation to Human Agents",body:`<ul><li>User explicitly asks for a human</li><li>Confidence score below threshold (&lt;70%)</li><li>Detected emotion: frustration, anger, distress</li><li>Topic requires human judgment (large refunds, legal matters, medical)</li><li>Conversation loop (user asked the same question 3 times)</li></ul>`},
+],quiz:[
+{q:"A customer asks 'Is product X compatible with Y?' The LLM was trained before X was released. Without RAG, what happens? With RAG?",opts:["Without: correct answer. With: slower answer","Without: LLM hallucinates or says it doesn't know. With RAG: retrieves product spec sheet from KB → gives accurate answer","Both produce the same answer","Without: refuses to answer. With: answers incorrectly"],correct:1,exp:"LLMs have a training cutoff and no knowledge of your specific products. Without RAG, the LLM either halluccinates an answer or admits it doesn't know. With RAG, the product specification is retrieved from your knowledge base and injected into the prompt — the LLM produces an accurate, grounded answer."},
+]}},
+{id:44,title:"AI-Powered Code Assistant",tag:"AI Systems",time:"13 min",content:{intro:"AI code assistants (like GitHub Copilot, Cursor, or Claude Code) help developers write code via inline completions, natural language generation, explanation, and debugging. The engineering challenge is achieving sub-200ms latency at scale.",sections:[
+{h2:"What Makes Code Assistants Unique",body:`<table class="comp-table"><thead><tr><th>Challenge</th><th>Why It's Hard</th><th>Solution</th></tr></thead><tbody><tr><td>Ultra-low latency (&lt;200ms)</td><td>Inline completions must feel instant to not interrupt flow</td><td>Smaller fast model for completions; larger for chat</td></tr><tr><td>Large codebase context</td><td>Good completions need to understand the whole project</td><td>LSP + RAG: retrieve relevant code snippets from codebase</td></tr><tr><td>Security</td><td>Code is sensitive IP — cannot send to external servers for some companies</td><td>On-premise deployment option</td></tr><tr><td>Multi-language</td><td>Python, JS, Rust, Go, SQL — all different patterns</td><td>Fine-tune on diverse code dataset per language</td></tr></tbody></table>`},
+{h2:"Inline Completion Architecture",body:`<div class="code-block">[Developer types in editor]
+       ↓
+[IDE Plugin captures context]
+  → Current file (last 2000 tokens before cursor)
+  → Open tab files (related code)
+  → Current function signature + docstring
+  → Language + framework detected
+       ↓
+[Context Optimizer]
+  → Trim to fit model context window (e.g., 8K tokens)
+  → Rank and select most relevant code snippets via RAG
+  → Retrieve similar code patterns from codebase index
+       ↓
+[Fast Completion Model] (specialized: CodeLlama-7B, StarCoder-3B)
+  → Optimized for inline FIM (Fill-In-the-Middle)
+  → Target: &lt;150ms for 1-3 lines of completion
+       ↓
+[Streaming tokens displayed in editor as ghost text]
+  Developer: Tab to accept, Esc to dismiss, continue typing</div>`,callout:{type:"info",title:"Fill-in-the-Middle (FIM)",body:"FIM is a special training format where the model sees code before AND after the cursor, then generates what fills the gap. This is crucial for inline completions — you're not always completing at the end of a file, often you're inserting in the middle."}},
+{h2:"Speculative Decoding for Speed",body:`<p>A major speedup technique:</p><ul><li><strong>Draft model</strong> (small, fast) generates 5 tokens speculatively</li><li><strong>Main model</strong> (large, accurate) verifies all 5 tokens in one parallel pass</li><li>If all correct → accept all 5 tokens at once</li><li>If first 3 correct → accept 3, reject rest</li><li>Net result: 2–4× faster generation with same output quality</li></ul>`},
+],quiz:[
+{q:"A developer types `def calculate_` in Python. The inline completion must appear in under 200ms. Which model choice is appropriate?",opts:["GPT-4 Turbo (large, high quality, ~2s latency)","A 3–7B parameter code-specialized model (fast, good quality, ~100ms)","ChatGPT-4o mini (designed for chat, not inline completion)","No model — use regex pattern matching"],correct:1,exp:"Inline completions require sub-200ms latency to feel native. Large models (GPT-4 size) take 1–5s even with optimizations. A 3–7B parameter model fine-tuned on code (StarCoder, CodeLlama-7B) achieves ~100ms on modern GPU hardware — fast enough for real-time use."},
+]}},
+{id:45,title:"Lessons from System Failures",tag:"Case Studies",time:"20 min",content:{intro:"The best engineers learn from real failures. These outages teach lessons no textbook can: how cascading failures work, why monitoring must be independent, and why multi-region is non-negotiable.",sections:[
+{h2:"Facebook 6-Hour Outage (October 4, 2021)",body:`<div class="code-block">What happened:
+  Routine BGP (Border Gateway Protocol) configuration update
+  accidentally removed all network routes to Facebook's data centers.
+  
+  Result: Facebook "disappeared" from the internet.
+  
+  Cascading failure:
+    1. BGP routes removed → internet cannot reach Facebook
+    2. Facebook's monitoring runs ON Facebook's infrastructure
+    3. Monitoring goes down → engineers cannot diagnose remotely
+    4. Facebook's internal DNS and auth also go down
+    5. Engineers cannot remotely log into systems to fix them
+    6. Physical access required → engineers must drive to data centers
+  
+  Duration: ~6 hours
+  Impact:   WhatsApp, Instagram, Messenger all offline globally
+  Cost:     ~$60M+ in lost ad revenue + brand damage</div>`,callout:{type:"warn",title:"Three Critical Lessons",body:"1) Never let a single config change affect 100% of infrastructure — use staged rollouts with automatic rollback. 2) Monitoring and incident tools must live on SEPARATE independent infrastructure. 3) Always maintain a physical out-of-band access path for emergencies (laptops that work without internal DNS)."}},
+{h2:"AWS US-East-1 Outage (December 7, 2021)",body:`<p>AWS's largest region (Northern Virginia) suffered a major outage affecting Netflix, Disney+, Slack, DoorDash, and thousands of businesses.</p><p><strong>Root Cause:</strong> Automated network capacity expansion triggered a cascade of congestion in internal network routing.</p><div class="code-block">Cascade:
+  1. Network scaling tool runs → triggers congestion
+  2. Congestion → triggers more scaling
+  3. Scaling → more congestion (positive feedback loop!)
+  4. Dozens of AWS services degrade or fail
+  5. AWS console itself becomes unusable
+     → Engineers cannot manage other services</div>`,callout:{type:"warn",title:"Lesson: Multi-Region is Non-Negotiable",body:"Netflix runs in 3 AWS regions simultaneously. US-East-1 failing shifts traffic automatically to US-West-2 and EU-West-1. Users experienced slightly higher latency — zero downtime. Companies running in a single region had hours of total outage."}},
+{h2:"Cascading Failure: The Most Dangerous Pattern",body:`<div class="code-block">How cascades start:
+  Service A is slow → Service B (calls A) times out → B returns errors
+  → Service C (calls B) gets errors → C's retry loop overwhelms B further
+  → B is now 100% error → C fails → D fails → ...
+
+Circuit Breaker Pattern:
+  After N failures: "open" the circuit → stop calling the failing service
+  → Return a default response or cached value
+  → Re-try after 30 seconds to check if service recovered
+  
+  Prevents: retry storms, cascade amplification
+  Enables: graceful degradation (partial functionality during outage)</div>`},
+{h2:"Failure Prevention Principles",body:`<table class="comp-table"><thead><tr><th>Principle</th><th>Implementation</th></tr></thead><tbody><tr><td>Staged rollouts</td><td>Canary 1% → 10% → 50% → 100%, monitor at each step</td></tr><tr><td>Circuit breakers</td><td>Stop calling failing services to prevent cascade amplification</td></tr><tr><td>Independent monitoring</td><td>Monitoring infra separate from production infra</td></tr><tr><td>Chaos engineering</td><td>Netflix's Chaos Monkey randomly kills production servers to test resilience</td></tr><tr><td>Blameless postmortems</td><td>Analyze systemic causes, not individuals — publish findings</td></tr><tr><td>Multi-region</td><td>Active-active across 2+ regions for critical services</td></tr></tbody></table>`},
+],quiz:[
+{q:"During the Facebook outage, engineers could not remotely log into systems to fix them. Why?",opts:["Their passwords expired","Facebook's internal DNS and authentication systems ran on the same infrastructure that was down","The internet was down globally","A ransomware attack disabled access"],correct:1,exp:"Facebook's internal tooling (DNS, authentication, monitoring) all relied on the same network infrastructure that went down. When BGP routes were removed, ALL of Facebook's infrastructure became unreachable — including the tools engineers needed to fix the problem. This is why independent out-of-band infrastructure is critical."},
+]}},
+{id:46,title:"Concluding Remarks & Next Steps",tag:"Conclusion",time:"12 min",content:{intro:"Congratulations on completing this course. You now have the knowledge to design any large-scale system confidently. Here is how to turn this knowledge into interview success and real-world expertise.",sections:[
+{h2:"What You Have Learned",body:`<table class="comp-table"><thead><tr><th>Topic Area</th><th>Key Skills</th></tr></thead><tbody><tr><td>Foundations</td><td>Abstractions, consistency models, CAP theorem, non-functional requirements, estimation</td></tr><tr><td>Building Blocks</td><td>DNS, Load Balancers, Databases, Caching, CDN, Queues, Blob Store, Rate Limiting</td></tr><tr><td>Advanced Components</td><td>Distributed search, logging, monitoring, task scheduling, sharded counters</td></tr><tr><td>Real Systems</td><td>YouTube, Uber, Twitter, WhatsApp, Google Maps, Instagram, TinyURL, Google Docs</td></tr><tr><td>AI Systems</td><td>ChatGPT architecture, RAG, feature stores, code assistants, LLM infrastructure</td></tr><tr><td>Reliability</td><td>Real-world failure case studies and prevention patterns</td></tr></tbody></table>`},
+{h2:"Interview Preparation Checklist",body:`<ul><li>☐ Clarify functional and non-functional requirements before designing</li><li>☐ Estimate scale: RPS, storage, and bandwidth before choosing components</li><li>☐ Start with a simple design, then evolve it based on scale</li><li>☐ Justify every design decision with explicit trade-offs</li><li>☐ Discuss bottlenecks and how to address them</li><li>☐ Mention fault tolerance, monitoring, and failure scenarios</li><li>☐ Check in with the interviewer every 10 minutes</li><li>☐ Never code — draw boxes and arrows, explain verbally</li></ul>`},
+{h2:"Your Learning Path Forward",body:`<p><strong>Build something real (best way to learn):</strong></p><ul><li>Build a URL shortener with Redis caching from scratch</li><li>Set up a Kafka producer-consumer pipeline</li><li>Deploy a service with blue-green deployment on AWS</li></ul><p><strong>Recommended reading:</strong></p><ul><li><strong>Designing Data-Intensive Applications</strong> by Martin Kleppmann — the definitive book on distributed systems</li><li><strong>System Design Interview</strong> by Alex Xu — interview-focused, highly practical</li><li><strong>The Google SRE Book</strong> — free online, real-world reliability engineering</li></ul><p><strong>Engineering blogs to follow:</strong></p><ul><li>Netflix Tech Blog, Uber Engineering, Airbnb Engineering, Meta Engineering</li><li>High Scalability (highscalability.com) — how real systems are built</li></ul>`,callout:{type:"success",title:"The Secret to Mastery",body:"There is no single right answer in system design. What matters: can you identify requirements, make reasonable trade-offs, and communicate your thinking clearly? These three skills separate good engineers from great ones. Practice them in every conversation, code review, and design discussion."}},
+],quiz:[
+{q:"After completing this course, what is the MOST effective next step to prepare for system design interviews?",opts:["Read 5 more system design books","Do mock interviews weekly and explain your designs out loud","Memorize all the building blocks","Watch more video lectures"],correct:1,exp:"Knowledge without practice does not translate to interview performance. System design is a communication skill — you must practice explaining your reasoning under time pressure. Mock interviews (recorded and reviewed) are the single highest-impact activity for interview readiness."},
+]}},
+{id:47,title:"System Design Case Studies",tag:"Case Studies",time:"18 min",content:{intro:"Real companies solving real problems at real scale. These case studies reveal the gap between textbook theory and production reality.",sections:[
+{h2:"How Spotify Wrapped Scales for 400M Users",body:`<div class="code-block">Challenge:
+  On launch day, 400M+ users simultaneously open the app
+  expecting instant personalized yearly statistics.
+  This is an impossible traffic spike if computed on-demand.
+
+Solution: Pre-compute everything weeks before launch
+
+Weeks before launch day:
+  1. MapReduce job processes ALL users' listening history
+     → For each user: top songs, artists, minutes, genres
+  2. Results stored in key-value store:
+     SET wrapped:{userId} → { topSong: "...", totalMinutes: 12453, ... }
+  3. Results pre-cached in Redis globally
+
+On launch day:
+  User opens app → GET wrapped:{userId} from Redis → instant!
+  Zero computation. Pure cache reads. Handles 400M users.</div>`,callout:{type:"success",title:"Key Lesson",body:"For predictable, scheduled traffic spikes, pre-compute all results in advance. Do not compute on-demand when millions hit you simultaneously. Move computation to off-peak hours using batch jobs."}},
+{h2:"How Amazon Scales for Prime Day",body:`<p>Prime Day generates more traffic than Black Friday + Cyber Monday combined. Amazon's strategies:</p><ul><li><strong>Capacity planning</strong> — Model expected traffic 3 months ahead, provision extra</li><li><strong>Cell-based architecture</strong> — Users assigned to isolated 'cells'; one cell's problems cannot cascade to others</li><li><strong>Load shedding</strong> — Gracefully reject low-priority requests (analytics) when system is near capacity rather than crashing</li><li><strong>Chaos testing</strong> — Simulate Prime Day traffic in staging weeks in advance</li></ul>`},
+{h2:"Dropbox: Deduplication at Scale",body:`<div class="code-block">Challenge: 700M users storing files → enormous storage costs
+
+Content-Addressable Deduplication:
+  1. Every file is split into 4 MB chunks
+  2. Each chunk is SHA-256 hashed
+  3. Hash is the storage key
+  4. Before storing: check if hash exists already
+  5. If yes: just store a reference, no new data!
+
+Result:
+  Two users upload identical file (e.g., popular software installer)
+  → Only ONE copy stored in blob storage
+  → Both users' metadata points to same chunks
+  → Saves Dropbox petabytes of storage
+
+Sync efficiency:
+  File changes 1% → only 1% of chunks need syncing
+  Edit one word in a 100MB document → sync only 4MB chunk</div>`},
+{h2:"Ticketmaster: Handling Taylor Swift Ticket Sales",body:`<div class="code-block">Challenge:
+  Taylor Swift tickets go on sale → millions of fans simultaneously
+  → 100,000 concurrent buyers competing for 50,000 seats
+  → Traditional queue would let fastest connection win (unfair)
+  → System would likely crash under load
+
+Solution: Virtual Waiting Room
+
+1. Pre-registration period:
+   Fans register in advance → randomly assigned a queue position
+   (Lottery — not fastest internet wins)
+
+2. Sale day:
+   Fans enter virtual waiting room with their queue position
+   Groups of ~1000 let in every few minutes
+   (Converts spike into controlled flow)
+
+3. Seat reservation:
+   Seat locked for 10 minutes while user checks out
+   → Pessimistic locking with Redis (SETNX seat:{seatId} userId)
+   → Expires after 10 min if not purchased
+
+4. Payment:
+   Idempotency key prevents double-charging
+   Seat released if payment fails or times out</div>`},
+],quiz:[
+{q:"Spotify Wrapped is released on December 1 every year. On December 1, 400M users open the app simultaneously. What is Spotify's key insight to handle this?",opts:["Auto-scale servers to 400M capacity on December 1","Pre-compute all wrapped statistics weeks before, cache in Redis — launch day is just cache reads","Use 400M database shards","Compute each user's statistics as they open the app in parallel"],correct:1,exp:"Pre-computation is the key insight. Spotify processes all listening history weeks before launch, stores results per user in Redis. On launch day, 400M users get instant responses — pure cache reads, no computation. This transforms an impossible real-time compute problem into a trivial cache lookup problem."},
+]}}
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+const done = new Set(JSON.parse(localStorage.getItem('sd_done')||'[]'));
+let curId = null;
+let streak = parseInt(localStorage.getItem('sd_streak')||'1');
+
+// ── NAV ───────────────────────────────────────────────────────────────────
+function renderNav(filter=''){
+  const nav = document.getElementById('sb-nav');
+  const tags = [...new Set(MODULES.map(m=>m.tag))];
+  nav.innerHTML = '';
+  tags.forEach(tag=>{
+    const items = MODULES.filter(m=>m.tag===tag && (!filter||m.title.toLowerCase().includes(filter.toLowerCase())||m.tag.toLowerCase().includes(filter.toLowerCase())));
+    if(!items.length) return;
+    const sec = document.createElement('div');
+    sec.innerHTML = `<div class="nav-sec-hdr">${tag}</div>`;
+    items.forEach(m=>{
+      const isDone = done.has(m.id);
+      const isActive = curId===m.id;
+      const btn = document.createElement('button');
+      btn.className = `nav-item${isDone?' done':''}${isActive?' active':''}`;
+      btn.innerHTML = `<span class="ni-num">${isDone?'✓':isActive?'▶':m.id}</span><span class="ni-label">${m.title}</span><span class="ni-check">${isDone&&!isActive?'✓':isActive?'▶':''}</span><span class="ni-dur">${m.time}</span>`;
+      btn.onclick = ()=>{loadModule(m.id); if(window.innerWidth<=900) toggleSidebar(false);};
+      sec.appendChild(btn);
+    });
+    nav.appendChild(sec);
+  });
+}
+
+function filterNav(v){ renderNav(v); }
+
+function updateProgress(){
+  const pct = Math.round(done.size/MODULES.length*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+}
+
+// ── LESSON ────────────────────────────────────────────────────────────────
+function loadModule(id){
+  curId = id;
+  const m = MODULES.find(x=>x.id===id);
+  if(!m) return;
+  renderNav();
+  updateProgress();
+  document.getElementById('tn-title').textContent = m.title;
+  const isDone = done.has(id);
+  const btn = document.getElementById('tn-complete');
+  btn.style.display = '';
+  btn.textContent = isDone ? '✓ Completed' : '✓ Mark Complete';
+  btn.style.background = isDone ? '#16a34a' : '';
+  document.getElementById('content').innerHTML = buildLesson(m);
+  window.scrollTo(0,0);
+}
+
+function buildLesson(m){
+  const idx = MODULES.findIndex(x=>x.id===m.id);
+  const prev = MODULES[idx-1];
+  const next = MODULES[idx+1];
+  const isDone = done.has(m.id);
+  const icons = {info:'💡',warn:'⚠️',success:'✅',tip:'💎'};
+
+  let body = `<div class="lesson-hero">
+    <div class="lesson-meta">
+      <span class="badge badge-mod">Module ${m.id}</span>
+      <span class="badge badge-time">⏱ ${m.time}</span>
+      <span class="badge badge-tag">${m.tag}</span>
+      ${isDone?'<span class="badge badge-done">✓ Completed</span>':''}
+    </div>
+    <h1 class="lesson-title">${m.title}</h1>
+    <p class="lesson-sub">${m.content.intro}</p>
+    <div class="lesson-acts">
+      <button class="btn-done${isDone?' completed':''}" onclick="markDone()">
+        ${isDone?'✓ Completed — Review Anytime':'Mark as Complete'}
+      </button>
+      ${next?`<button class="btn btn-ghost" onclick="loadModule(${next.id})">Next: ${next.title} →</button>`:''}
+    </div>
+  </div>
+  <div class="lesson-body">`;
+
+  m.content.sections.forEach(sec=>{
+    body += `<h2>${sec.h2}</h2>${sec.body||''}`;
+    if(sec.callout){
+      const t = sec.callout.type||'info';
+      body += `<div class="callout callout-${t}"><div class="callout-title">${icons[t]||'💡'} ${sec.callout.title}</div><div>${sec.callout.body}</div></div>`;
+    }
+  });
+
+  if(m.content.quiz&&m.content.quiz.length){
+    body += `<div class="quiz-section"><div class="quiz-hdr">🧠 Knowledge Check</div>`;
+    m.content.quiz.forEach((q,qi)=>{
+      body += `<div class="quiz-q" data-qi="${qi}"><p class="q-text">${qi+1}. ${q.q}</p><div class="quiz-opts">`;
+      q.opts.forEach((opt,oi)=>{
+        body += `<button class="quiz-opt" onclick="answerQ(${m.id},${qi},${oi})">${opt}</button>`;
+      });
+      body += `</div><div class="quiz-fb" id="qfb-${m.id}-${qi}"></div></div>`;
+    });
+    body += `</div>`;
+  }
+
+  body += `</div>
+  <div class="lesson-nav-bot">
+    <button class="nav-arr" onclick="loadModule(${prev?prev.id:m.id})" ${!prev?'disabled':''}>← ${prev?prev.title.substring(0,30)+(prev.title.length>30?'…':''):'Start'}</button>
+    <span style="font-size:11px;color:var(--text2)">${idx+1} / ${MODULES.length}</span>
+    <button class="nav-arr next" onclick="${next?`loadModule(${next.id})`:`showOverview()`}">${next?(next.title.substring(0,28)+(next.title.length>28?'…':''))+' →':'↩ Overview'}</button>
+  </div>`;
+
+  return body;
+}
+
+function answerQ(mid, qi, oi){
+  const m = MODULES.find(x=>x.id===mid);
+  const q = m.content.quiz[qi];
+  const qEl = document.querySelector(`[data-qi="${qi}"]`);
+  if(!qEl) return;
+  const opts = qEl.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i)=>{
+    o.disabled = true;
+    if(i===q.correct) o.classList.add(oi===q.correct?'correct':'reveal');
+    if(i===oi&&oi!==q.correct) o.classList.add('wrong');
+  });
+  const fb = document.getElementById(`qfb-${mid}-${qi}`);
+  if(fb){ fb.className=`quiz-fb show ${oi===q.correct?'correct':'wrong'}`; fb.textContent=(oi===q.correct?'✓ Correct! ':'✗ Not quite. ')+q.exp; }
+}
+
+function markDone(){
+  if(!curId) return;
+  if(!done.has(curId)){
+    done.add(curId);
+    localStorage.setItem('sd_done', JSON.stringify([...done]));
+    streak++; localStorage.setItem('sd_streak', streak);
+    document.getElementById('streak-val').textContent = streak+' day'+(streak===1?'':'s');
+    showXP(curId);
+  }
+  loadModule(curId);
+}
+
+function showXP(id){
+  const m = MODULES.find(x=>x.id===id);
+  const t = document.getElementById('xp-toast');
+  document.getElementById('xp-msg').textContent = `+50 XP — "${m.title}" Complete!`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────
+function showOverview(){
+  curId = null;
+  document.getElementById('tn-complete').style.display = 'none';
+  document.getElementById('tn-title').textContent = 'Modern System Design';
+  renderNav();
+  const totalMin = MODULES.reduce((s,m)=>s+parseInt(m.time),0);
+  const tags = [...new Set(MODULES.map(m=>m.tag))];
+
+  let html = `<div class="overview">
+    <div class="ov-hero">
+      <h1>Modern System Design</h1>
+      <p>${MODULES.length} modules · ${Math.round(totalMin/60)} hours of content · From zero to designing YouTube, Uber, Twitter, WhatsApp, and more.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="val">${MODULES.length}</div><div class="lbl">Modules</div></div>
+        <div class="stat-card"><div class="val">${Math.round(totalMin/60)}h</div><div class="lbl">Total Time</div></div>
+        <div class="stat-card"><div class="val">${done.size}</div><div class="lbl">Completed</div></div>
+        <div class="stat-card"><div class="val">${Math.round(done.size/MODULES.length*100)}%</div><div class="lbl">Progress</div></div>
+      </div>
+    </div>`;
+
+  tags.forEach(tag=>{
+    const items = MODULES.filter(m=>m.tag===tag);
+    const tagDone = items.filter(m=>done.has(m.id)).length;
+    html += `<div class="sec-hdr"><h2>${tag}</h2><span style="font-size:11.5px;color:var(--text2)">${tagDone}/${items.length} completed</span></div><div class="modules-grid">`;
+    items.forEach((m,i)=>{
+      const isDone = done.has(m.id);
+      html += `<div class="mod-card${isDone?' completed':''}" onclick="loadModule(${m.id})" style="animation-delay:${i*0.035}s">
+        <div class="mc-top"><div class="mc-num">${m.id}</div><span style="font-size:16px">${isDone?'✅':'⭕'}</span></div>
+        <div class="mc-title">${m.title}</div>
+        <div class="mc-meta"><span>⏱ ${m.time}</span><span class="mc-tag">${m.tag}</span></div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  const next = MODULES.find(m=>!done.has(m.id));
+  if(next){
+    html += `<div style="text-align:center;padding:20px 0 40px"><button class="cont-btn" onclick="loadModule(${next.id})">Continue: ${next.title} →</button></div>`;
+  } else {
+    html += `<div style="text-align:center;padding:30px 0 50px"><div style="font-size:40px;margin-bottom:12px">🎓</div><p style="font-family:var(--font-head);font-size:22px;font-weight:800;margin-bottom:8px">Course Complete!</p><p style="color:var(--text2)">You have mastered Modern System Design. Go build something great.</p></div>`;
+  }
+
+  html += `</div>`;
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────
+function toggleSidebar(force){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('overlay');
+  const open = force !== undefined ? force : !sb.classList.contains('open');
+  sb.classList.toggle('open', open);
+  ov.classList.toggle('show', open);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+document.getElementById('streak-val').textContent = streak + ' day' + (streak===1?'':'s');
+renderNav();
+updateProgress();
+showOverview();
+</script>
+</body>
+</html>
